@@ -34,9 +34,9 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 		#note that the http request handler is not stateful.
 		#however it can access the server data members.
 		config = self.server.config
-		log_file_name = config["log_file_name"]
-		state_file_name = config["state_file_name"]
-		secret_file_name = config["secret_file_name"]
+		log_file_name = config["manager"]["log_file_name"]
+		state_file_name = config["manager"]["state_file_name"]
+		secret_file_name = config["manager"]["secret_file_name"]
 
 		post = cgi.FieldStorage(
 			fp=self.rfile, 
@@ -73,16 +73,3 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 			self.wfile.write(result)
 		elif ( action == "get_path" ):
 			print "SHIT"
-
-if __name__ == '__main__':
-	config = json.loads(open("config.json").read())
-	HOST_NAME = config["host_name"]
-	PORT_NUMBER = config["port_number"]
-	httpd = Server( (HOST_NAME, PORT_NUMBER), Handler, config )
-	print time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
-	try:
-		httpd.serve_forever()
-	except KeyboardInterrupt:
-		pass
-	httpd.server_close()
-	print time.asctime(), "Server Stops - %s:%s" % (HOST_NAME, PORT_NUMBER)

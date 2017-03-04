@@ -1,5 +1,8 @@
 {
-"site":"http://localhost",
+"root_dir":"data/",
+"proxy_file":"worker/proxy_list",
+
+"site":"http://127.0.0.1/",
 "get_task":"get_task",
 "on_notify":"on_notify",
 "node":{"node_id":"worker1","node_key":"123456"}

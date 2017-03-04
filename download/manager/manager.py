@@ -1,4 +1,5 @@
 import os
+import re
 import time
 
 #time utils.
@@ -32,6 +33,10 @@ def next_day(date):
 
 def update_state_file(file_name, end_time, start_time="", is_init = False):
 	if (is_init):
+		if (re.findall('/',file_name)):
+			dir = file_name.rsplit('/',1)[0]
+			if( not os.path.exists(dir) ):
+				os.makedirs(dir)
 		if (not os.path.exists(file_name)):
 			open(file_name,'wb').close();
 		if (start_time == ""):
@@ -48,15 +53,15 @@ def update_state_file(file_name, end_time, start_time="", is_init = False):
 			print ("file does not exist");
 			exit();
 
-		while(is_occupied(file_name)):
-			time.sleep(random.randint(1,3));
+		#while(is_occupied(file_name)):
+		#	time.sleep(random.randint(1,3));
 		fp = open(file_name,'r');
 		st = fp.readlines()[-1].split(' ')[0];
 		st = next_day(st);
 		fp.close();
 
-		while(is_occupied(file_name)):
-			time.sleep(random.randint(1,3));
+		#while(is_occupied(file_name)):
+		#	time.sleep(random.randint(1,3));
 		fp = open(file_name,'a');
 	
 	y = int(st[:4]);
@@ -152,14 +157,14 @@ def on_notify(log_file_name, state_file_name, notify_type, args):
 		time_used = args["time_used"];
 
 		change_state(state_file_name, task, "finished");
-		result_str = "%s %s %s finished, time used: %s(s)" % (strftime, node_id, task, time_used) 
+		result_str = "%s %s %s finished, time used: %s(s)\n" % (strftime, node_id, task, time_used) 
 		fp.write(result_str)
 	elif (notify_type == "started"):
 		node_id = args["node_id"];
 		task = args["task"];
 
 		change_state(state_file_name, task, "pending");
-		result_str = "%s %s %s started" % (strftime, node_id, task)
+		result_str = "%s %s %s started\n" % (strftime, node_id, task)
 		fp.write(result_str);
 	elif (notify_type == "terminated"):
 		node_id = args["node_id"];
@@ -167,7 +172,7 @@ def on_notify(log_file_name, state_file_name, notify_type, args):
 
 		change_state(state_file_name, task, "terminated");
 	
-		result_str = "%s %s %s terminated" % (strftime, node_id, task)
+		result_str = "%s %s %s terminated\n" % (strftime, node_id, task)
 		fp.write(result_str);
 
 	fp.close();

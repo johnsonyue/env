@@ -6,15 +6,15 @@ class RequestHandler():
 	def __init__(self, config_file_name):
 		self.config = json.loads(open(config_file_name,'rb').read())
 
-		site = self.config["site"]
-		get_task = self.config["get_task"]
+		site = self.config["worker"]["site"]
+		get_task = self.config["worker"]["get_task"]
 		self.get_task_url = "%s/%s" % (site, get_task)
 
-		on_notify = self.config["on_notify"]
+		on_notify = self.config["worker"]["on_notify"]
 		self.notify_url = "%s/%s" % (site, on_notify)
 
-		self.node_id = self.config["node"]["node_id"]
-		self.node_key = self.config["node"]["node_key"]
+		self.node_id = self.config["worker"]["node"]["node_id"]
+		self.node_key = self.config["worker"]["node"]["node_key"]
 
 	def get_task(self, source):
 		params = { "node_id": self.node_id, "node_key": self.node_key, "source": source}; 

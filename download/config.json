@@ -1,4 +1,19 @@
 {
-"root_dir":"data/",
-"proxy_file":"worker/proxy_list"
+"manager":{
+	"host_name":"127.0.0.1",
+	"port_number":80,
+	"state_file_name":"files/state",
+	"log_file_name":"files/log",
+	"secret_file_name":"files/nodes"
+},
+
+"worker":{
+	"root_dir":"data/",
+	"proxy_file":"worker/proxy_list",
+
+	"site":"http://127.0.0.1/",
+	"get_task":"get_task",
+	"on_notify":"on_notify",
+	"node":{"node_id":"worker1","node_key":"123456"}
+}
 }

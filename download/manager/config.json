@@ -1,7 +1,7 @@
 {
-"host_name":"172.17.0.2",
+"host_name":"127.0.0.1",
 "port_number":80,
-"state_file_name":"files/state",
-"log_file_name":"files/log",
-"secret_file_name":"files/nodes"
+"state_file_name":"state",
+"log_file_name":"log",
+"secret_file_name":"nodes"
 }
