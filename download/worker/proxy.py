@@ -226,7 +226,6 @@ class ProxyPool():
 			f.write(svr+'\n');
 		f.close();
 		
-pool = ProxyPool("proxy_iplane");
-#pool.update_proxy(True, 100, 30);
+pool = ProxyPool("proxy_list");
 pool.update_proxy(False, 10, 30);
-pool.export_proxy("proxy_iplane");
+pool.export_proxy("proxy_list");

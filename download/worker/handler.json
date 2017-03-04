@@ -1,5 +1,5 @@
 {
-"site":"http://172.17.0.5",
+"site":"http://localhost",
 "get_task":"get_task",
 "on_notify":"on_notify",
 "node":{"node_id":"worker1","node_key":"123456"}

@@ -5,9 +5,6 @@ import cgi
 
 import manager
 
-HOST_NAME = '172.17.0.5'
-PORT_NUMBER = 80
-
 class Server(BaseHTTPServer.HTTPServer):
 	def __init__(self, (HOST_NAME, PORT_NUMBER), handler, config):
 		BaseHTTPServer.HTTPServer.__init__(self, (HOST_NAME, PORT_NUMBER), handler)
@@ -79,6 +76,8 @@ class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
 	config = json.loads(open("config.json").read())
+	HOST_NAME = config["host_name"]
+	PORT_NUMBER = config["port_number"]
 	httpd = Server( (HOST_NAME, PORT_NUMBER), Handler, config )
 	print time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
 	try:

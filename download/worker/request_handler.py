@@ -16,8 +16,8 @@ class RequestHandler():
 		self.node_id = self.config["node"]["node_id"]
 		self.node_key = self.config["node"]["node_key"]
 
-	def get_task(self):
-		params = { "node_id": self.node_id, "node_key": self.node_key}; 
+	def get_task(self, source):
+		params = { "node_id": self.node_id, "node_key": self.node_key, "source": source}; 
 		opener = urllib2.build_opener()
 		post_data = urllib.urlencode(params).encode('utf-8')
 		res = opener.open(self.get_task_url, post_data).read()
@@ -59,7 +59,3 @@ class RequestHandler():
 			exit()
 		
 		return res
-
-handler = RequestHandler("handler.json")
-date = handler.get_task()
-print handler.notify_started(date, "caida")

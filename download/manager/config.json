@@ -1,4 +1,6 @@
 {
+"host_name":"172.17.0.2",
+"port_number":80,
 "state_file_name":"files/state",
 "log_file_name":"files/log",
 "secret_file_name":"files/nodes"
