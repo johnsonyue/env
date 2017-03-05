@@ -34,7 +34,7 @@ def build_hops(hops_field, replied, dst_ip, dst_rtt):
 	return hops.strip(trace.hop_delimiter)
 
 def uniform_caida():
-	#sys.stderr.write("Message: started parsing caida...\n")
+	sys.stderr.write("Message: started parsing caida...\n")
 	is_header_updated = False
 	header=""
 	while True:
@@ -45,6 +45,8 @@ def uniform_caida():
 				is_header_updated = False
 			elif (not line.split(' ')[0] == "#"): #not comment
 				fields = line.strip('\n').split(trace.field_delimiter, 13)
+				if (len(fields) < 14): #sometimes there's no hop at all.
+					continue
 				if (not is_header_updated):
 					src_ip = fields[1]
 					header = trace.update_src_ip(header,src_ip)
@@ -59,10 +61,10 @@ def uniform_caida():
 				hops = build_hops(hops_field,replied,dst_ip,dst_rtt)
 				
 				print trace.build_trace_str(dst_ip, timestamp, hops)
-		except:
+		except Exception, e:
 			break
 		
-	#sys.stderr.write("Finished parsing caida.")
+	sys.stderr.write("Finished parsing caida.")
 
 def usage():
 	sys.stderr.write("./uniform.py <source>\n")

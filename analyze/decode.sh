@@ -28,7 +28,7 @@ decode_caida(){
 			python -c "import trace; trace.print_header(\""$source"\",\""$date"\",\""$monitor"\",\"*\")"
 
 			url=$date_dir"/"$fn
-			[ ! -n $( echo $date_dir"/"$fn | grep "\.gz$" ) ] && continue #skip none-.gz file.
+			[ -z $( echo $date_dir/$fn | grep "\.gz$" ) ] && continue #skip none-.gz file.
 			decode_caida_file $url
 		done
 	done
