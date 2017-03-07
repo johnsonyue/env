@@ -1,21 +1,38 @@
 import sys
-import networkx as nx
-import pickle
 import bz2
+import time
 
 import trace
 
-graph = nx.Graph()
-
 def build_graph():
-	prev_node = -1
+	node=[]
+	node_dict={}
+	edge={}
+	cnt = -1
+	tm = time.time()
 	while True:
 		try:
+			prev_node = -1
 			line = raw_input()
 			if ( line.split(trace.header_delimiter)[0] == trace.header_indicator ):
-				continue #ignore headers.
-			field_list = line.split(trace.field_delimiter)
+				t = time.time()
+				sys.stderr.write( "%s,%s,%s\n" % (line, t, t-tm) )
+				tm = t
+				cnt += 1
+				if ( cnt >= 1 ):
+					printg(node,edge)
+					print "###"
+					del node_dict
+					del node
+					del edge
+					node_dict = {}
+					node = []
+					edge = {}
+					sys.stderr.write( "%s,%s,%s\n" % (str(node_dict), str(node), str(edge)) )
+					cnt = 0
+				continue
 
+			field_list = line.split(trace.field_delimiter)
 			#dst_ip = field_list[ trace.trace_index["dst_ip"] ]
 			#timestamp = field_list[ trace.trace_index["timestamp"] ]
 			hops = field_list[ trace.trace_index["hops"] ]
@@ -26,19 +43,28 @@ def build_graph():
 				reply_list = h.split(trace.reply_delimiter)
 				first_reply = reply_list[0]
 				ip = first_reply.split(trace.ip_delimiter)[trace.hop_index["ip"]]
+				if (not node_dict.has_key(ip)):
+					index = len(node)
+					node.append(ip)
+					node_dict[ip] = index
+				else:
+					index = node_dict[ip]
+
 				if (prev_node != -1):
-					graph.add_edge(prev_node, ip)
-				prev_node = ip
+					edge[(prev_node, index)] = ""
+				prev_node = index
 		except:
+			sys.stderr.write("OUTPUT\n")
+			printg(node,edge)
+
 			break
 
-def print_graph():
-	for e in graph.edges():
-		print "%s %s" % (e[0], e[1])
+def printg(node, edge):
+	print "%s %s" % ( len(node), len(edge.keys()) )
+	for n in node:
+		print n
+	for e in edge.keys():
+		print "%s %s" % ( str(e[0]), str(e[1]) )
 
-def export_graph():
-	f = bz2.BZ2File("graph.bz2",'w')
-	pickle.dump(graph, f)
-
-build_graph()
-print_graph()
+if __name__ == "__main__":
+	build_graph()

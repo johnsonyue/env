@@ -11,7 +11,7 @@ dates=$3 #can parse more than one date
 #decoding function for each source.
 decode_caida_file(){
 	url=$1
-	#echo "Message: gzip -cd $url | sc_analysis_dump" >&2
+	echo "Message: gzip -cd $url | sc_analysis_dump" >&2
 	gzip -cd $url | sc_analysis_dump #decompress and dump to stdout
 }
 

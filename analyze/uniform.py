@@ -64,7 +64,7 @@ def uniform_caida():
 		except Exception, e:
 			break
 		
-	sys.stderr.write("Finished parsing caida.")
+	sys.stderr.write("Finished parsing caida.\n")
 
 def usage():
 	sys.stderr.write("./uniform.py <source>\n")
