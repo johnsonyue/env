@@ -8,7 +8,7 @@
 },
 
 "worker":{
-	"root_dir":"data/",
+	"root_dir":"/data/",
 	"proxy_file":"worker/proxy_list",
 
 	"site":"http://127.0.0.1/",
