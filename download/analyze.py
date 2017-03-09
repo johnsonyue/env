@@ -24,8 +24,8 @@ def main(argv):
 		if (not os.path.exists(out_dir)):
 			os.makedirs(out_dir)
 		date = ""
-		try:
-			while(True):
+		while(True):
+			try:
 				date = handler.get_task(data_source)
 				print date
 				sys.stdout.flush()
@@ -43,10 +43,13 @@ def main(argv):
 				time_used = end_time - start_time
 				print handler.notify_finished(date, time_used, data_source),
 				sys.stdout.flush()
-		except Exception, e:
-			print e
-			print handler.notify_terminated(date,data_source)
-			pass
+			except KeyboardInterrupt:
+				print "ctrl-c"
+				print handler.notify_terminated(date,data_source)
+				break
+			except Exception, e:
+				print e
+				break
 
 if __name__ == "__main__":
 	main(sys.argv)
