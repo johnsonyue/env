@@ -35,7 +35,9 @@ def main(argv):
 				sys.stdout.flush()
 				
 				print "../analyze/decode.sh %s %s %s | python ../analyze/uniform.py %s | python ../analyze/analyze.py >%s/%s.graph" % (data_source, root_dir, date, data_source, out_dir, date)
-				os.system( "../analyze/decode.sh %s %s %s | python ../analyze/uniform.py %s | python ../analyze/analyze.py >%s/%s.graph" % (data_source, root_dir, date, data_source, out_dir, date) )
+				os.chdir( "../analyze" )
+				os.system( "decode.sh %s %s %s | python uniform.py %s | python analyze.py >%s/%s.graph" % (data_source, root_dir, date, data_source, out_dir, date) )
+				os.chdir( "../download" )
 				time.sleep(5)
 		
 				end_time = time.time()
