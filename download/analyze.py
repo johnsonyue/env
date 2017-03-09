@@ -1,11 +1,12 @@
 import time
 import json
 import os
+import sys
 
 from worker import request_handler
 
 def usage():
-	print "python download.py <source>"
+	print "python analyze.py <source>"
 
 def main(argv):
 	if len(argv) < 2:
@@ -20,6 +21,8 @@ def main(argv):
 	if data_source == "caida":
 		root_dir = config["worker"]["root_dir"]
 		out_dir = config["worker"]["out_dir"]
+		if (not os.path.exists(out_dir)):
+			os.makedirs(out_dir)
 		date = ""
 		try:
 			while(True):
@@ -31,8 +34,8 @@ def main(argv):
 				print handler.notify_started(date,data_source),
 				sys.stdout.flush()
 				
-				#os.system( "../analyze/decode %s %s %s | python ../analyze/uniform.py %s | python ../analyze/analyze.py >%s/%s.graph" % (data_source, root_dir, date, data_source, out_dir, date) )
-				print "../analyze/decode %s %s %s | python ../analyze/uniform.py %s | python ../analyze/analyze.py >%s/%s.graph" % (data_source, root_dir, date, data_source, out_dir, date)
+				print "../analyze/decode.sh %s %s %s | python ../analyze/uniform.py %s | python ../analyze/analyze.py >%s/%s.graph" % (data_source, root_dir, date, data_source, out_dir, date)
+				os.system( "../analyze/decode.sh %s %s %s | python ../analyze/uniform.py %s | python ../analyze/analyze.py >%s/%s.graph" % (data_source, root_dir, date, data_source, out_dir, date) )
 				time.sleep(5)
 		
 				end_time = time.time()

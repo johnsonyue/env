@@ -10,6 +10,8 @@
 "worker":{
 	"root_dir":"/data/",
 	"proxy_file":"worker/proxy_list",
+	
+	"out_dir":"/home/docker_data/out/",
 
 	"site":"http://127.0.0.1/",
 	"get_task":"get_task",

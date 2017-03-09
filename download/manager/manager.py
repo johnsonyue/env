@@ -106,7 +106,7 @@ def update_path_state_file(file_name, data_dir, is_init=False):
 			dir = file_name.rsplit('/',1)[0]
 			if( not os.path.exists(dir) ):
 				os.makedirs(dir)
-		fp = open(file_name,'wb').close()
+		fp = open(file_name,'wb')
 
 		for dir in os.popen("ls -1A %s | sort" % (data_dir)).readlines():
 			dir = dir.strip('\n')
