@@ -34,11 +34,10 @@ def main(argv):
 				print handler.notify_started(date,data_source),
 				sys.stdout.flush()
 				
-				print "../analyze/decode.sh %s %s %s | python ../analyze/uniform.py %s | python ../analyze/analyze.py >%s/%s.graph" % (data_source, root_dir, date, data_source, out_dir, date)
-				os.chdir( "../analyze" )
-				os.system( "decode.sh %s %s %s | python uniform.py %s | python analyze.py >%s/%s.graph" % (data_source, root_dir, date, data_source, out_dir, date) )
+				print "./decode.sh %s %s %s | python uniform.py %s | python analyze.py >%s/%s.graph" % (data_source, root_dir, date, data_source, out_dir, date)
+				os.chdir( "../analyze" ) #ugly,can't change until I figure out a better way
+				os.system( "./decode.sh %s %s %s | python uniform.py %s | python analyze.py >%s/%s.graph" % (data_source, root_dir, date, data_source, out_dir, date) )
 				os.chdir( "../download" )
-				time.sleep(5)
 		
 				end_time = time.time()
 				time_used = end_time - start_time

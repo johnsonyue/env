@@ -1,3 +1,4 @@
+#! /bin/bash
 if [ $# -ne 3 ]; then
 	echo "./decode.sh <source> <data_dir> <dates>" >&2
 	exit
