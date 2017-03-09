@@ -111,7 +111,8 @@ def update_path_state_file(file_name, data_dir, is_init=False):
 		for dir in os.popen("ls -1A %s | sort" % (data_dir)).readlines():
 			dir = dir.strip('\n')
 			if ( re.findall("^\d{8}$", dir) ):
-				fp.write("%s unassigned\n" % dir)
+				if ( len(os.popen("ls -1A %s/%s" % (data_dir, dir)).readlines()) ): #not empty
+					fp.write("%s unassigned\n" % dir)
 		exit()
 
 	#not init
