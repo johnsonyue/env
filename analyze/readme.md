@@ -20,7 +20,7 @@
 
 			#on nfs-server
 			#generate state file
-			root# ./scan.sh <share_dir>
+			root# ./scan.py <share_dir>
 			#start httpd
 			root# nohup python httpd.py >httpd_log 2>&1 &
 			
