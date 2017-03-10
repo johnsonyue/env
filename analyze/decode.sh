@@ -21,7 +21,7 @@ decode_caida(){
 	for d in $( echo ${date_list[*]} ); do
 		date_dir=$data_dir"/"$d
 		[ ! -d $date_dir ] && continue #skip non-existen date_dir 
-		for fn in $( ls $date_dir ); do
+		for fn in $( ls $date_dir | awk '!(NR%3)' ); do #temporary compromise
 			monitor=$( echo $fn | cut -d'.' -f3 )
 
 			#print header.
