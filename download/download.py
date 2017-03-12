@@ -21,8 +21,8 @@ def main(argv):
 		proxy_file = config["worker"]["proxy_file"]
 		root_dir = config["worker"]["root_dir"]
 		date = ""
-		try:
-			while(True):
+		while(True):
+			try:
 				date = handler.get_task(data_source)
 				print date
 				sys.stdout.flush()
