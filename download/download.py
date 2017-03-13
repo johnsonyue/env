@@ -2,7 +2,7 @@ import sys
 import time
 import json
 
-from worker import caida, request_handler
+from worker import caida, iplane, request_handler
 
 def usage():
 	print "python download.py <source>"
@@ -43,6 +43,36 @@ def main(argv):
 				break
 			except Exception, e:
 				print e
+				print handler.notify_terminated(date,data_source)
+				break
+
+	elif data_source == "iplane":
+		proxy_file = config["worker"]["proxy_file"]
+		root_dir = config["worker"]["root_dir"]
+		date = ""
+		while(True):
+			try:
+				date = handler.get_task(data_source)
+				print date
+				sys.stdout.flush()
+				
+				start_time = time.time()
+				print handler.notify_started(date,data_source),
+				sys.stdout.flush()
+		
+				iplane.download_date(date, root_dir=root_dir, proxy_file=proxy_file, mt_num=2)
+		
+				end_time = time.time()
+				time_used = end_time - start_time
+				print handler.notify_finished(date, time_used, data_source),
+				sys.stdout.flush()
+			except KeyboardInterrupt:
+				print "ctrl-c"
+				print handler.notify_terminated(date,data_source)
+				break
+			except Exception, e:
+				print e
+				print handler.notify_terminated(date,data_source)
 				break
 
 if __name__ == "__main__":

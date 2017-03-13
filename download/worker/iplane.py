@@ -1,10 +1,12 @@
 import HTMLParser
 import urllib
 import urllib2
+import sys
 import os
 import cookielib
 import time
 import math
+import json
 
 import multi_thread
 
@@ -41,7 +43,7 @@ class iPlaneParser(HTMLParser.HTMLParser):
 #load authentication info.
 def load_auth(auth_file):
 	j = json.loads( open(auth_file,'r').read() )
-	return { "username":j["caida"]["username"], "password":j["caida"]["password"] }
+	return { "username":j["iplane"]["username"], "password":j["iplane"]["password"] }
 
 def get_iplane_opener(username, password):
 	print "logging in..."
@@ -97,13 +99,13 @@ def parse_latest_year(url, opener, reversed):
 	parser.feed(text)
 	
 	if (not reversed):
-		res = parser.file[-1]
+		result = parser.file[-1]
 	else:
-		res = parser.file[0]
-	list = res.split('.')[0].split['_']
-	res = list[1]+list[2]+list[3]
+		result = parser.file[0]
+	lst = result.split('.')[0].split('_')
+	result = lst[1]+lst[2]+lst[3]
 	
-	return res
+	return result
 	
 def construct_url_fromtime(target_time):
 	url = "https://data-store.ripe.net/datasets/iplane-traceroutes/"
@@ -116,6 +118,16 @@ def construct_url_fromtime(target_time):
 	return res
 
 #downloading with multi-thread support.
+def download_iplane_restricted_wrapper(argv, resource):
+	url = argv[0]
+	dir = argv[1]
+	file= argv[2]
+	opener = argv[3]
+	start = argv[4]
+	end = argv[5]
+	
+	proxy = resource[0]
+	return download_segemented_iplane_restricted_worker(url,dir,file,opener,start,end,proxy)
 
 def download_segemented_iplane_restricted_worker(url, dir, file, opener, start, end, proxy=""):
 	request=urllib2.Request(url)
@@ -176,16 +188,7 @@ def assemble_segements(dir, file):
 	
 	return ""
 
-class DownloadThread(threading.Thread):
-	def __init__(self, target, args):
-		threading.Thread.__init__(self, target=target, args=args)
-		self.start_time = time.time()
-	
-	def get_time_alive(self):
-		end_time = time.time()
-		return end_time - self.start_time
-
-def download_date(date, root_dir="/media/download_iplane/", proxy_file="", seg_size=20*1024*1024, mt_num=0):
+def download_date(date, root_dir="data/", proxy_file="", seg_size=20*1024*1024, mt_num=0):
 	auth_info = load_auth("accounts.json")
 	is_succeeded = False
 	url = construct_url_fromtime(date)
@@ -195,7 +198,7 @@ def download_date(date, root_dir="/media/download_iplane/", proxy_file="", seg_s
 	if (not os.path.exists(dir)):
 		os.makedirs(dir)
 	
-	opener = get_iplane_opener(auth[0], auth[1])
+	opener = get_iplane_opener(auth_info["username"], auth_info["password"])
 
 	#get the size first.
 	file_size = get_iplane_file_size(opener, url)
@@ -230,7 +233,7 @@ def download_date(date, root_dir="/media/download_iplane/", proxy_file="", seg_s
 		argv_list.append(argv)
 	
 	#run with multi thread.
-	multi_thread.run_with_multi_thread(download_segemented_iplane_restricted_worker, argv_list, proxy_list, mt_num)
+	multi_thread.run_with_multi_thread(download_iplane_restricted_wrapper, argv_list, proxy_list, mt_num)
 	
 	#assemble segements.
 	assemble_segements(dir, file)
