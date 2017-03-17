@@ -22,10 +22,11 @@ def main(argv):
 	node_dict = {}
 	edge = {}
 	tnode = []
+	tnode_dict = {}
 	
 	num_node=0
 	num_edge=0
-	geoip = geoip.geoip_helper()
+	geo = geoip.geoip_helper()
 	while (True):
 		try:
 			line=raw_input()
@@ -39,32 +40,38 @@ def main(argv):
 			elif (num_node):
 				n=line.strip('\n')
 				tnode.append(n)
+				country=geo.query(n)["mmdb"]["country"]
+				if (country=="AF"):
+					tnode_dict[n]=""
 				num_node-=1
 			else:
+				print_node(node)
+				break
 				e=line.strip('\n')
-				src=tnode[e.split(' ')[0]]
-				dst=tnode[e.split(' ')[1]]
-				country_src=geoip.query(src)["mmdb"]["country"]
-				country_dst=geoip.query(dst)["mmdb"]["country"]
-				if (country_src=="AF" or country_dst=="AF"):
-					if(not node_dict.has_key(src)):
+				src=int(e.split(' ')[0])
+				dst=int(e.split(' ')[1])
+				if (tnode_dict.has_key(src) or tnode_dict.has_key(dst)):
+					src_ip=tnode[src]
+					dst_ip=tnode[dst]
+					if(not node_dict.has_key(src_ip)):
 						index_src=len(node)
-						node.append(src)
-						node_dict[src]=index_src
+						node.append(src_ip)
+						node_dict[src_ip]=index_src
 					else:
-						index_src=node_dict[src]
+						index_src=node_dict[src_ip]
 
-					if(not node_dict.has_key(dst)):
+					if(not node_dict.has_key(dst_ip)):
 						index_dst=len(node)
-						node.append(dst)
-						node_dict[dst]=index_dst
+						node.append(dst_ip)
+						node_dict[dst_ip]=index_dst
 					else:
-						index_src=node_dict[dst]
+						index_src=node_dict[dst_ip]
 					
 					edge[(index_src,index_dst)]=""
 						
 				num_edge-=1
 		except EOFError:
+			printg(node, edge)
 			break
 		except Exception, e:
 			sys.stderr.write("%s\n"%(e))
