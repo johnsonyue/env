@@ -17,7 +17,16 @@ def print_edge(edge):
 	for e in edge:
 		print str(e[0]) + " " + str(e[1])
 
+def usage():
+	print "python extract.py <cc>"
+
 def main(argv):
+	if(len(argv)<2):
+		usage()
+		exit()
+	
+	cc=argv[1]
+
 	node = []
 	node_dict = {}
 	edge = {}
@@ -41,12 +50,10 @@ def main(argv):
 				n=line.strip('\n')
 				tnode.append(n)
 				country=geo.query(n)["mmdb"]["country"]
-				if (country=="AF"):
-					tnode_dict[n]=""
+				if (country==cc):
+					tnode_dict[len(tnode)-1]=""
 				num_node-=1
 			else:
-				print_node(node)
-				break
 				e=line.strip('\n')
 				src=int(e.split(' ')[0])
 				dst=int(e.split(' ')[1])
@@ -74,7 +81,7 @@ def main(argv):
 			printg(node, edge)
 			break
 		except Exception, e:
-			sys.stderr.write("%s\n"%(e))
+			sys.stderr.write("%s, %s\n"%(Exception, e))
 			break
 
 if __name__ == "__main__":

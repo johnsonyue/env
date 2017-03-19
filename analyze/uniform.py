@@ -78,9 +78,17 @@ def build_lg_hops(trace_list):
 	return hops.strip(trace.hop_delimiter)
 
 def is_ip_ligit(ip):
-	if(re.match(r"((2[0-4]\d|25[0-5]|1\d\d|[1-9]\d|\d)\.){3}((2[0-4]\d|25[0-5]|1\d\d|[1-9]\d|\d))",ip)):
-		return True
-	return False
+	decs=ip.split('.')
+	if (len(decs)!=4):
+		return False #4 decimals.
+	for d in decs:
+		if(d==""):
+			return False
+		if(int(d)>255 or int(d)<0): #not in [0-255]
+			return False
+		if(int(d)!=0 and d[0]=='0'): #has extra 0 pad
+			return False
+	return True
 
 def uniform_lg():
 	sys.stderr.write("started parsing lg ...\n")
