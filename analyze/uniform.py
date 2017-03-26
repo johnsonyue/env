@@ -116,7 +116,6 @@ def uniform_lg():
 				hops = build_lg_hops(trace_list)
 				print trace.build_trace_str(target_ip, "*", hops)
 				trace_list=[]
-				target_ip=""
 
 		except EOFError:
 			if len(trace_list) != 0:

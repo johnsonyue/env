@@ -33,10 +33,10 @@ def is_int_ligit(i):
 	if i>math.pow(2,32)-1 or i<0:
 		return False
 	else:
-		True
+		return True
 
 def int2ip(i):
-	if not is_int_ligit:
+	if not is_int_ligit(i):
 		return ""
 	l=[]
 	q=i
