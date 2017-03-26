@@ -72,25 +72,47 @@ def build_graph():
                         dst_ip = field_list[ trace.trace_index["dst_ip"] ]
                         #timestamp = field_list[ trace.trace_index["timestamp"] ]
                         hops = field_list[ trace.trace_index["hops"] ]
-                        hop_list = hops.split(trace.hop_delimiter)
+                        temp_hop_list = hops.split(trace.hop_delimiter)
+
+			hop_list=[]
+			for i in range(len(temp_hop_list)): #ignore blank prefix.
+				if ( temp_hop_list[i]==trace.blank_holder):
+					continue
+				else:
+					hop_list=temp_hop_list[i:]
+			if (len(hop_list) == 0): #do nothing if all blank.
+				continue
+			
+			blank_cnt = 0
+			reply_list = hop_list[0].split(trace.reply_delimiter)
+			first_reply = reply_list[0]
+			ip = first_reply.split(trace.ip_delimiter)[trace.hop_index["ip"]]
+			none_blank = ip2int(ip)
                         for i in range(len(hop_list)):
 				h=hop_list[i]
                                 if h == trace.blank_holder:
-					if (prev_node!=-1):
-						insert_edge(edge,prev_node,-1)
+					blank_cnt+=1
 					prev_node=-1
-                                        continue #ignores blank
+                                        continue #blank
                                 reply_list = h.split(trace.reply_delimiter)
                                 first_reply = reply_list[0]
                                 ip = first_reply.split(trace.ip_delimiter)[trace.hop_index["ip"]]
 				ind=ip2int(ip)
-				if ( i == len(hop_list)-1 and ip==dst_ip ):
+				if ( i == len(hop_list)-1 and ip==dst_ip ): #if target is reached 
 					node[ind] = "t"
 				elif (not node.has_key(ind) ):
 					node[ind] = "r"
+				
+				if ( prev_node == -1 ): #if prev is blank
+					blank=(none_blank,blank_cnt,ind)
+					node[blank] = "r"
+					insert_edge(edge,none_blank,blank)
+					insert_edge(edge,blank,ind)
+				else:
+					insert_edge(edge,prev_node,ind)
 
-				insert_edge(edge,prev_node,ind)
                                 prev_node = ind
+				none_blank = ind
                 except EOFError:
                         sys.stderr.write("OUTPUT\n")
                         printg(node,edge)
@@ -99,12 +121,18 @@ def build_graph():
 		except Exception, e:
 			print e
 
+def node2str(n):
+	if type(n) == type(1):
+		return int2ip(n)
+	return "(%s,%s,%s)" % (int2ip(n[0]), n[1], int2ip(n[2]))
+	
+
 def printg(node, edge):
         print "%s %s" % ( len(node), len(edge) )
         for i,t in node.items():
-                print "%s, %s"%(int2ip(i),t)
+		print "%s, %s" % ( node2str(i), t )
         for e,c in edge.items():
-                print "%s %s %s" % ( int2ip(e[0]), int2ip(e[1]), c )
+                print "%s %s %s" % ( node2str(e[0]), node2str(e[1]), c )
 
 if __name__ == "__main__":
         build_graph()
