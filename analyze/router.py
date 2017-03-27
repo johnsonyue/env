@@ -52,7 +52,7 @@ def insert_edge(edge,src,dst):
 	if(edge.has_key((src,dst))):
 		edge[(src,dst)]+=1
 	else:
-		edge[(src,dst)]=0
+		edge[(src,dst)]=1
 
 def build_graph():
 	node={}
@@ -80,6 +80,7 @@ def build_graph():
 					continue
 				else:
 					hop_list=temp_hop_list[i:]
+					break
 			if (len(hop_list) == 0): #do nothing if all blank.
 				continue
 			
@@ -87,7 +88,7 @@ def build_graph():
 			reply_list = hop_list[0].split(trace.reply_delimiter)
 			first_reply = reply_list[0]
 			ip = first_reply.split(trace.ip_delimiter)[trace.hop_index["ip"]]
-			none_blank = ip2int(ip)
+			node_blank = -1
                         for i in range(len(hop_list)):
 				h=hop_list[i]
                                 if h == trace.blank_holder:
@@ -103,16 +104,16 @@ def build_graph():
 				elif (not node.has_key(ind) ):
 					node[ind] = "r"
 				
-				if ( prev_node == -1 ): #if prev is blank
-					blank=(none_blank,blank_cnt,ind)
+				if ( prev_node == -1 and node_blank != -1): #if prev is blank
+					blank=(node_blank,blank_cnt,ind)
 					node[blank] = "r"
-					insert_edge(edge,none_blank,blank)
+					insert_edge(edge,node_blank,blank)
 					insert_edge(edge,blank,ind)
-				else:
+				elif ( prev_node != -1):
 					insert_edge(edge,prev_node,ind)
 
                                 prev_node = ind
-				none_blank = ind
+				node_blank = ind
                 except EOFError:
                         sys.stderr.write("OUTPUT\n")
                         printg(node,edge)
@@ -120,12 +121,12 @@ def build_graph():
                         break
 		except Exception, e:
 			print e
+			break
 
 def node2str(n):
 	if type(n) == type(1):
 		return int2ip(n)
 	return "(%s,%s,%s)" % (int2ip(n[0]), n[1], int2ip(n[2]))
-	
 
 def printg(node, edge):
         print "%s %s" % ( len(node), len(edge) )
