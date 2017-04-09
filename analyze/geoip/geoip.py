@@ -20,9 +20,9 @@ class geoip_helper():
 	
 	def query(self, ip):
 		bgp = self.query_from_bgp(ip)
-		mmdb = self.query_from_mmdb(ip)
-		czdb = self.query_from_czdb(ip)
-		ip2location = self.query_from_ip2location(ip)
+		mmdb = ""
+		czdb = ""
+		ip2location = ""
 		return {"bgp":bgp, "mmdb":mmdb, "czdb":czdb, "ip2location":ip2location}
 	
 	def query_from_bgp(self, ip):

@@ -14,9 +14,10 @@
 
 header_index = {
 	"source":0, #{caida, iplane, lg, ripeatlas ..}
-	"date":1, #yyyymmdd
-	"monitor":2, #name of the monitor
-	"src_ip":3, #Source IP of skitter/scamper monitor performing the trace.
+	"team":1,
+	"date":2, #yyyymmdd
+	"monitor":3, #name of the monitor
+	"src_ip":4, #Source IP of skitter/scamper monitor performing the trace.
 }
 trace_index = {
 	"dst_ip":0, #Destination IP being traced.
@@ -41,8 +42,10 @@ ip_delimiter = ","
 reply_delimiter = ";"
 blank_holder = "q"
 
-def print_header(source, date, monitor, src_ip):
-	print ( "%s%s%s%s%s%s%s%s%s" % (header_indicator, header_delimiter, source, header_delimiter, date, header_delimiter, monitor, header_delimiter, src_ip) )
+country_seperator = "|" #seperator used in country.py output.
+
+def print_header(source, team, date, monitor, src_ip):
+	print ( "%s%s%s%s%s%s%s%s%s%s%s" % (header_indicator, header_delimiter, source, header_delimiter, team, header_delimiter, date, header_delimiter, monitor, header_delimiter, src_ip) )
 
 def bash_import():
 	print "declare -A header"

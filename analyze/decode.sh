@@ -22,11 +22,12 @@ decode_caida(){
 		date_dir=$data_dir"/"$d
 		[ ! -d $date_dir ] && continue #skip non-existen date_dir 
 		for fn in $( ls $date_dir ); do #temporary compromise
+			team=$( echo $fn | cut -d'.' -f1 )
 			monitor=$( echo $fn | cut -d'.' -f3 )
 
 			#print header.
 			#note that src_ip is not determined until uniform process.
-			python -c "import trace; trace.print_header(\""$source"\",\""$date"\",\""$monitor"\",\"*\")"
+			python -c "import trace; trace.print_header(\""$source"\",\""$team"\",\""$d"\",\""$monitor"\",\"*\")"
 
 			url=$date_dir"/"$fn
 			[ -z $( echo $date_dir/$fn | grep "\.gz$" ) ] && continue #skip none-.gz file.
