@@ -128,11 +128,19 @@ def node2str(n):
 		return int2ip(n)
 	return "(%s,%s,%s)" % (int2ip(n[0]), n[1], int2ip(n[2]))
 
+#def printg(node, edge):
+#        print "%s %s" % ( len(node), len(edge) )
+#        for i,t in node.items():
+#		print "%s, %s" % ( node2str(i), t )
+#        for e,c in edge.items():
+#                print "%s %s %s" % ( node2str(e[0]), node2str(e[1]), c )
+
 def printg(node, edge):
         print "%s %s" % ( len(node), len(edge) )
-        for i,t in node.items():
+        for i in sorted(node.iterkeys()):
+		t=node[i]
 		print "%s, %s" % ( node2str(i), t )
-        for e,c in edge.items():
+        for e,c in sorted(edge.iteritems(), key=lambda (k,v):(k[0],k[1],v)):
                 print "%s %s %s" % ( node2str(e[0]), node2str(e[1]), c )
 
 if __name__ == "__main__":

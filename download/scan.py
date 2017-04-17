@@ -12,7 +12,7 @@ def main(argv):
 		usage()
 		exit()
 
-	source = argv[0]
+	source = argv[1]
 	config = json.loads(open("config.json").read())
 	state_file_name = config["manager"]["state_file_name"]
 	data_dir = config["worker"]["root_dir"]

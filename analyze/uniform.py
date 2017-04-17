@@ -23,14 +23,14 @@ def build_hops(hops_field, replied, dst_ip, dst_rtt):
 			h.append( (ip, rtt, ntries) )
 		hops += trace.build_hop_str(h)+trace.hop_delimiter #uses hop format in trace.
 	
-		#append dst_ip to the end if replied.
-		h = []
-		if (replied):
-			ip = dst_ip
-			rtt = dst_rtt
-			nTries = "1"
-			h.append( (ip, rtt, ntries) )
-			hops += trace.build_hop_str(h)+trace.hop_delimiter #uses hop format in trace.
+	#append dst_ip to the end if replied.
+	h = []
+	if (replied):
+		ip = dst_ip
+		rtt = dst_rtt
+		nTries = "1"
+		h.append( (ip, rtt, ntries) )
+		hops += trace.build_hop_str(h)+trace.hop_delimiter #uses hop format in trace.
 
 	return hops.strip(trace.hop_delimiter)
 
@@ -59,7 +59,10 @@ def uniform_caida():
 				replied = fields[6] #if replied, add dst_ip to hops.
 				dst_rtt = fields[7] 
 				hops_field = fields[13] 
+				print "dst_ip: "+str(dst_ip) #debug.
+				print "hops_field: "+str(hops_field) #debug.
 				hops = build_hops(hops_field,replied,dst_ip,dst_rtt)
+				print "hops: "+str(hops) #debug.
 				
 				print trace.build_trace_str(dst_ip, timestamp, hops)
 		except Exception, e:

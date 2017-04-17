@@ -16,3 +16,12 @@
 			
 			#on nfs-client
 			root# nohup python run.py <source> <mount_point> >analyze_log 2>&1 &
+
+ * download:
+			
+			#generate state file
+			root# python cron.py <source>
+			#start httpd
+			root# nohup python httpd.py >httpd_log 2>&1 &
+			#start downloading.
+			root# nohup python download.py caida >download_log 2>&1 &
