@@ -35,7 +35,8 @@ def main(argv):
 
 	country_list = [
 		"CN","US","JP","KR","RU",
-		"SY","IR","LY","AF","IQ"
+		"SY","IR","LY","AF","IQ",
+		"PK","TW","HK"
 	]
 	geo = geoip.geoip_helper()
         tm = time.time()
@@ -58,6 +59,7 @@ def main(argv):
 				#output
 				if (team and date and monitor):
 					output(team, date, monitor, line_dict, data_dir)
+					line_dict={}
 				#update team,date,monitor
 				fields_list=line.split(trace.header_delimiter)[1:]
 				team=fields_list[trace.header_index["team"]]
