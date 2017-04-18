@@ -59,10 +59,7 @@ def uniform_caida():
 				replied = fields[6] #if replied, add dst_ip to hops.
 				dst_rtt = fields[7] 
 				hops_field = fields[13] 
-				print "dst_ip: "+str(dst_ip) #debug.
-				print "hops_field: "+str(hops_field) #debug.
 				hops = build_hops(hops_field,replied,dst_ip,dst_rtt)
-				print "hops: "+str(hops) #debug.
 				
 				print trace.build_trace_str(dst_ip, timestamp, hops)
 		except Exception, e:

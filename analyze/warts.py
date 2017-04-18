@@ -69,9 +69,12 @@ def main(argv):
 				monitor=fields_list[trace.header_index["monitor"]]
 				continue
 
+			if (line.split(' ')[0] == "#"): #not comment
+				continue
+
 			#trace line.
                         field_list = line.split(trace.field_delimiter)
-                        dst_ip = field_list[ trace.trace_index["dst_ip"] ]
+                        dst_ip = field_list[2]
 			cn=geo.query(dst_ip)["bgp"]["country"]
 			if cn in country_list:
 				if not line_dict.has_key(cn):
