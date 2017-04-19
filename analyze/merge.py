@@ -56,19 +56,19 @@ def merge(file1, file2, file_out):
 	file_out_temp=file_out+".temp"
 	fpot=open(file_out_temp,'w')
 	
-	#merge.
+	#merge node.
 	node_cnt=0
 	edge_cnt=0
-	if num_node1>0:
-		line1=fp1.readline()
-	if num_node2>0:
-		line2=fp2.readline()
+
+	line1=fp1.readline()
+	line2=fp2.readline()
 	while (num_node1>0 and num_node2>0):
-		if (node_line_cmp(line1,line2) < 0):
+		cmp = node_line_cmp(line1,line2)
+		if (cmp < 0):
 			fpot.write(line1)
 			num_node1-=1
 			line1=fp1.readline()
-		elif (node_line_cmp(line1,line2) > 0):
+		elif (cmp > 0):
 			fpot.write(line2)
 			num_node2-=1
 			line2=fp2.readline()
@@ -92,16 +92,14 @@ def merge(file1, file2, file_out):
 		line2=fp2.readline()
 		node_cnt+=1
 	
-	if num_edge1>0:
-		line1=fp1.readline()
-	if num_edge2>0:
-		line2=fp2.readline()
+	#merge edge
 	while (num_edge1>0 and num_edge2>0):
-		if (edge_line_cmp(line1,line2) < 0):
+		cmp = edge_line_cmp(line1,line2)
+		if (cmp < 0):
 			fpot.write(line1)
 			num_edge1-=1
 			line1=fp1.readline()
-		elif (edge_line_cmp(line1,line2) > 0):
+		elif (cmp > 0):
 			fpot.write(line2)
 			num_edge2-=1
 			line2=fp2.readline()
@@ -148,7 +146,7 @@ def gunzip(data_dir):
 	file_list = map(lambda x:x.strip('\n').split('/')[-1], file_list)
 	ret_list = []
 	for f in file_list:
-		os.system("gzip -kd %s" % (data_dir+"/"+f))
+		os.system("gzip -kdf %s" % (data_dir+"/"+f))
 		ret_list.append(f.strip(".gz"))
 	
 	return ret_list
