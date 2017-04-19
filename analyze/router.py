@@ -1,6 +1,8 @@
 import sys
+import os
 import time
 import math
+import subprocess
 
 import trace
 
@@ -54,10 +56,32 @@ def insert_edge(edge,src,dst):
 	else:
 		edge[(src,dst)]=1
 
-def build_graph():
+def store(team, date, true_date, monitor, node, edge, data_dir):
+	path="%s/%s"%(data_dir,date)
+	if ( not os.path.exists(path) ):
+		os.makedirs(path)
+	
+	fn="%s/%s.%s.%s.herpes.gz" % (path,team,true_date,monitor)
+	fp=open(fn,'w')
+	h = subprocess.Popen(['gzip', '-c', '-'], stdin=subprocess.PIPE, stdout=fp)
+	
+	h.stdin.write( "%s %s\n" % ( len(node), len(edge) ) )
+        for i in sorted( node.iterkeys() ):
+		t=node[i]
+		h.stdin.write( "%s, %s\n" % ( node2str(i), t ) )
+        for e,c in sorted(edge.iteritems(), key=lambda (k,v):(k[0],k[1])):
+                h.stdin.write( "%s %s %s\n" % ( node2str(e[0]), node2str(e[1]), c ) )
+	h.stdin.close()
+
+def build_graph(data_dir):
 	node={}
         edge={}
         tm = time.time()
+	
+	team=""
+	date=""
+	true_date=""
+	monitor=""
         while True:
                 try:
                         prev_node = -1
@@ -66,6 +90,18 @@ def build_graph():
                                 t = time.time()
                                 sys.stderr.write( "%s,%s,%s\n" % (line, t, t-tm) )
                                 tm = t
+
+				#output
+				if (team and date and true_date and monitor):
+					store(team, date, true_date, monitor, node, edge, data_dir)
+					node={}
+					edge={}
+				#update team,date,monitor
+				fields_list=line.split(trace.header_delimiter)[1:]
+				team=fields_list[trace.header_index["team"]]
+				true_date=fields_list[trace.header_index["true_date"]]
+				date=fields_list[trace.header_index["date"]]
+				monitor=fields_list[trace.header_index["monitor"]]
                                 continue
 
                         field_list = line.split(trace.field_delimiter)
@@ -115,8 +151,7 @@ def build_graph():
                                 prev_node = ind
 				node_blank = ind
                 except EOFError:
-                        sys.stderr.write("OUTPUT\n")
-                        printg(node,edge)
+			store(team, date, true_date, monitor, node, edge, data_dir)
 
                         break
 		except Exception, e:
@@ -128,20 +163,16 @@ def node2str(n):
 		return int2ip(n)
 	return "(%s,%s,%s)" % (int2ip(n[0]), n[1], int2ip(n[2]))
 
-#def printg(node, edge):
-#        print "%s %s" % ( len(node), len(edge) )
-#        for i,t in node.items():
-#		print "%s, %s" % ( node2str(i), t )
-#        for e,c in edge.items():
-#                print "%s %s %s" % ( node2str(e[0]), node2str(e[1]), c )
+def usage():
+	print "python router.py <data_dir>"
 
-def printg(node, edge):
-        print "%s %s" % ( len(node), len(edge) )
-        for i in sorted( node.iterkeys() ):
-		t=node[i]
-		print "%s, %s" % ( node2str(i), t )
-        for e,c in sorted(edge.iteritems(), key=lambda (k,v):(k[0],k[1])):
-                print "%s %s %s" % ( node2str(e[0]), node2str(e[1]), c )
+def main(argv):
+	if len(argv) < 2:
+		usage()
+		exit()
+	
+	data_dir=argv[1]
+	build_graph(data_dir)
 
 if __name__ == "__main__":
-        build_graph()
+	main(sys.argv)

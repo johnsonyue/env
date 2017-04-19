@@ -43,7 +43,7 @@ def edge_line_cmp(line1, line2):
 
 def merge(file1, file2, file_out):
 	#open files.
-	fp1=open(file1,'r')
+	fp1 = open(file1, 'r')
 	line1=fp1.readline()
 	num_node1=int(line1.split(' ')[0])
 	num_edge1=int(line1.split(' ')[1])
@@ -143,6 +143,16 @@ def merge(file1, file2, file_out):
 	
 	os.remove(file_out_temp)
 
+def gunzip(data_dir):
+	file_list = os.popen( "ls %s/*.gz" % (data_dir) ).readlines()
+	file_list = map(lambda x:x.strip('\n').split('/')[-1], file_list)
+	ret_list = []
+	for f in file_list:
+		os.system("gzip -kd %s" % (data_dir+"/"+f))
+		ret_list.append(f.strip(".gz"))
+	
+	return ret_list
+
 def usage():
 	print "python merge.py dir"
 
@@ -152,11 +162,11 @@ def main(argv):
 		exit()
 
 	data_dir=argv[1]
-	file_list = os.popen( "ls %s" % (data_dir) ).readlines()
-	file_list = map(lambda x:x.strip('\n'), file_list)
+	#file_list = os.popen( "ls %s" % (data_dir) ).readlines()
+	#file_list = map(lambda x:x.strip('\n'), file_list)
+	file_list = gunzip(data_dir)
 	
 	prev_file_list=[]
-	is_origin=True
 	while (len(file_list)>1):
 		temp_file_list=[]
 		for i in range(len(file_list)/2):
@@ -178,9 +188,7 @@ def main(argv):
 		for i in range(len(prev_file_list)):
 			os.remove(data_dir+"/"+prev_file_list[i])
 		
-		if (not is_origin):
-			prev_file_list=file_list
-		is_origin = False
+		prev_file_list=file_list
 		file_list=temp_file_list
 
 	for i in range(len(prev_file_list)):
