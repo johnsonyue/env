@@ -137,10 +137,10 @@ def node2str(n):
 
 def printg(node, edge):
         print "%s %s" % ( len(node), len(edge) )
-        for i in sorted(node.iterkeys()):
+        for i in sorted( node.iterkeys() ):
 		t=node[i]
 		print "%s, %s" % ( node2str(i), t )
-        for e,c in sorted(edge.iteritems(), key=lambda (k,v):(k[0],k[1],v)):
+        for e,c in sorted(edge.iteritems(), key=lambda (k,v):(k[0],k[1])):
                 print "%s %s %s" % ( node2str(e[0]), node2str(e[1]), c )
 
 if __name__ == "__main__":

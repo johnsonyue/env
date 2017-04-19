@@ -1,5 +1,45 @@
 import sys
 import os
+import re
+
+def ip2int(ip):
+	r=3
+	i=0
+	for o in ip.split('.'):
+		o=int(o)
+		i+=o*pow(256,r)
+		r-=1
+	
+	return i
+
+def node_line_cmp(line1, line2):
+	line1=line1.split(', ')[0]
+	line2=line2.split(', ')[0]
+	if (re.findall("\(",line1)):
+		if (not re.findall("\(",line2)):
+			return 1
+		else:
+			tuple1=line1.replace("(","").replace(")","").split(',')[:2]
+			tuple1=map(lambda x:ip2int(x), tuple1)
+			tuple2=line2.replace("(","").replace(")","").split(',')[:2]
+			tuple2=map(lambda x:ip2int(x), tuple2)
+			if ( tuple1[0] != tuple2[0] ):
+				return tuple1[0] - tuple2[0]
+			else:
+				return tuple1[1] - tuple2[1]
+	else:
+		if (re.findall("\(",line2)):
+			return -1
+		else:
+			return ip2int(line1)-ip2int(line2)
+			
+def edge_line_cmp(line1, line2):
+	tuple1=line1.split(' ')
+	tuple2=line2.split(' ')
+	if node_line_cmp(tuple1[0], tuple2[0]) != 0:
+		return node_line_cmp(tuple1[0], tuple2[0])
+	else:
+		return node_line_cmp(tuple1[1], tuple2[1])
 
 def merge(file1, file2, file_out):
 	#open files.
@@ -24,32 +64,32 @@ def merge(file1, file2, file_out):
 	if num_node2>0:
 		line2=fp2.readline()
 	while (num_node1>0 and num_node2>0):
-		if (line1 < line2):
+		if (node_line_cmp(line1,line2) < 0):
 			fpot.write(line1)
-			line1=fp1.readline()
 			num_node1-=1
-		elif (line1 > line2):
+			line1=fp1.readline()
+		elif (node_line_cmp(line1,line2) > 0):
 			fpot.write(line2)
-			line2=fp2.readline()
 			num_node2-=1
+			line2=fp2.readline()
 		else:
 			fpot.write(line1)
-			line1=fp1.readline()
-			line2=fp2.readline()
 			num_node1-=1
 			num_node2-=1
+			line1=fp1.readline()
+			line2=fp2.readline()
 		node_cnt+=1
 		
 	while (num_node1>0):
 		fpot.write(line1)
-		line1=fp1.readline()
 		num_node1-=1
+		line1=fp1.readline()
 		node_cnt+=1
 		
 	while (num_node2>0):
 		fpot.write(line2)
-		line2=fp2.readline()
 		num_node2-=1
+		line2=fp2.readline()
 		node_cnt+=1
 	
 	if num_edge1>0:
@@ -57,32 +97,36 @@ def merge(file1, file2, file_out):
 	if num_edge2>0:
 		line2=fp2.readline()
 	while (num_edge1>0 and num_edge2>0):
-		if (line1 < line2):
+		if (edge_line_cmp(line1,line2) < 0):
 			fpot.write(line1)
-			line1=fp1.readline()
 			num_edge1-=1
-		elif (line1 > line2):
+			line1=fp1.readline()
+		elif (edge_line_cmp(line1,line2) > 0):
 			fpot.write(line2)
-			line2=fp2.readline()
 			num_edge2-=1
-		else:
-			fpot.write(line1)
-			line1=fp1.readline()
 			line2=fp2.readline()
+		else:
+			edge_field=line1.split(' ')[:-1]
+			edge_num1=int(line1.split(' ')[-1])
+			edge_num2=int(line2.split(' ')[-1])
+			line=edge_field[0]+" "+edge_field[1]+" "+str(edge_num1+edge_num2)+"\n"
+			fpot.write(line)
 			num_edge1-=1
 			num_edge2-=1
+			line1=fp1.readline()
+			line2=fp2.readline()
 		edge_cnt+=1
 
 	while (num_edge1>0):
 		fpot.write(line1)
-		line1=fp1.readline()
 		num_edge1-=1
+		line1=fp1.readline()
 		edge_cnt+=1
 
 	while (num_edge2>0):
 		fpot.write(line2)
-		line2=fp2.readline()
 		num_edge2-=1
+		line2=fp2.readline()
 		edge_cnt+=1
 	fpot.close()
 
