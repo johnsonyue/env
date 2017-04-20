@@ -24,10 +24,11 @@ decode_caida(){
 		for fn in $( ls $date_dir ); do #temporary compromise
 			team=$( echo $fn | cut -d'.' -f1 )
 			monitor=$( echo $fn | cut -d'.' -f3 )
+			true_date=$( echo $fn | cut -d'.' -f2 )
 
 			#print header.
 			#note that src_ip is not determined until uniform process.
-			python -c "import trace; trace.print_header(\""$source"\",\""$team"\",\""$d"\",\""$monitor"\",\"*\")"
+			python -c "import trace; trace.print_header(\""$source"\",\""$team"\",\""$d"\",\""$true_date"\",\""$monitor"\",\"*\")"
 
 			url=$date_dir"/"$fn
 			[ -z $( echo $date_dir/$fn | grep "\.gz$" ) ] && continue #skip none-.gz file.
@@ -36,8 +37,31 @@ decode_caida(){
 	done
 }
 
+decode_crabs(){
+	date_list=($dates)
+	for d in $( echo ${date_list[*]} ); do
+		date_dir=$data_dir"/"$d
+		[ ! -d $date_dir ] && continue #skip non-existen date_dir 
+		for fn in $( ls $date_dir ); do #temporary compromise
+			team=$( echo $fn | cut -d'.' -f1 )
+			monitor=$( echo $fn | cut -d'.' -f3 )
+			true_date=$( echo $fn | cut -d'.' -f2 )
+
+			#print header.
+			#note that src_ip is not determined until uniform process.
+			python -c "import trace; trace.print_header(\""$source"\",\""$team"\",\""$d"\",\""$true_date"\",\""$monitor"\",\"*\")"
+
+			url=$date_dir"/"$fn
+			[ -z $( echo $date_dir/$fn | grep "\.gz$" ) ] && continue #skip none-.gz file.
+			gzip -cd $url 
+		done
+	done
+}
+
 if [ $source = "caida" ]; then
 	decode_caida
+elif [ $source = "crabs" ]; then
+	decode_crabs
 elif [ $source = "iplane" ]; then
 	dump_iplane
 fi
