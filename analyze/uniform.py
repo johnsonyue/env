@@ -25,7 +25,7 @@ def build_hops(hops_field, replied, dst_ip, dst_rtt):
 	
 	#append dst_ip to the end if replied.
 	h = []
-	if (replied):
+	if (replied=='R'):
 		ip = dst_ip
 		rtt = dst_rtt
 		nTries = "1"
