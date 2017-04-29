@@ -30,6 +30,7 @@ def main(argv):
 		usage()
 
 	dst_dir = argv[1]
+	dst_dir = dst_dir+"/pch"
 	if (not os.path.exists(dst_dir)):
 		os.makedirs(dst_dir)
 	download_pch(dst_dir)
