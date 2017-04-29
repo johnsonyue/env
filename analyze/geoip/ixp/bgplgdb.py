@@ -68,7 +68,8 @@ def parse_ixp():
 			print l
 
 def main(argv):
-	parse_ixp()
+	#parse_ixp()
+	parse_ixp_offline() #email field not available in webpage source code
 
 if __name__ == "__main__":
 	main(sys.argv)
