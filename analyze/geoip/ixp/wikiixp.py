@@ -2,8 +2,59 @@ import urllib
 import os
 import signal
 import HTMLParser
-import sys
+import sys  
+
+reload(sys)  
+sys.setdefaultencoding('utf8')
 import re
+
+class TagParser(HTMLParser.HTMLParser):
+	def __init__(self, tag):
+		HTMLParser.HTMLParser.__init__(self)
+		self.target_tag = tag
+		self.is_target = False
+		self.nest_cnt = 0
+		self.tag_list = []
+		self.buff = ""
+	def handle_starttag(self, tag, attrs):
+		if (tag == self.target_tag and self.nest_cnt == 0):
+			self.is_target = True
+			self.nest_cnt += 1
+			self.buff += "<"+self.target_tag+" "
+			for k,v in attrs:
+				self.buff += k+"=\""+v+"\" "
+			self.buff = self.buff.strip(" ")
+			self.buff += ">"
+
+		elif (tag == self.target_tag):
+			self.nest_cnt += 1
+			self.buff += "<"+self.target_tag+" "
+			for k,v in attrs:
+				self.buff += k+"=\""+v+"\" "
+			self.buff = self.buff.strip(" ")
+			self.buff += ">"
+		elif (self.is_target):
+			self.buff += "<"+tag+" "
+			for k,v in attrs:
+				self.buff += k+"=\""+v+"\" "
+			self.buff = self.buff.strip(" ")
+			self.buff += ">"
+	def handle_endtag(self, tag):
+		if (tag == self.target_tag and self.nest_cnt == 1):
+			self.is_target = False
+			self.nest_cnt -= 1
+			self.buff += "</"+self.target_tag+">"
+			self.tag_list.append(self.buff)
+			self.buff = ""
+		elif (tag == self.target_tag):
+			self.nest_cnt -= 1
+			self.buff += "</"+self.target_tag+">"
+		elif (self.is_target):
+			self.buff += "</"+tag+">"
+			
+	def handle_data(self, data):
+		if (self.is_target):
+			self.buff+=data
 
 class WikiRefParser(HTMLParser.HTMLParser):
 	def __init__(self):
@@ -78,7 +129,7 @@ class WikiIXPParser(HTMLParser.HTMLParser):
 		self.td=""
 	
 	def handle_starttag(self, tag, attrs):
-		if (not self.is_body and tag == "tbody"):
+		if (not self.is_body and tag == "table"):
 			self.is_body = True
 		
 		if (self.is_body and tag == "td"):
@@ -96,7 +147,7 @@ class WikiIXPParser(HTMLParser.HTMLParser):
 		
 	def handle_endtag(self, tag):
 		if (self.is_body and tag == "tr"):
-			if (len(self.line) == 1):
+			if (len(self.line) <= 1):
 				return
 			region=self.line[0]
 			country_city=self.line[1]
@@ -125,14 +176,44 @@ class WikiIXPParser(HTMLParser.HTMLParser):
 		if (self.is_link and not self.is_sup):
 			self.td+="["+data+"]"+" <"+self.root+self.link+">"
 
-def parse_ref():
+def parse_ref_offline():
 	parser = WikiRefParser()
 	parser.feed(open("wiki-ref.html",'rb').read())
 	return parser.cites
 
-def parse_ixp(cites):
+def parse_ixp_offline(cites):
 	parser = WikiIXPParser()
 	parser.feed(open("list-of-ixp.html",'rb').read())
+	for l in parser.lines:
+		fields=l.split('|')
+		name=fields[2]
+		t=re.findall("\[\d+\]",name)
+		if len(t) != 0:
+			index = int(t[0].replace('[','').replace(']',''))
+			fields[2] = name.replace(t[0], cites[index])
+		line=""
+		for f in fields:
+			line+=f+"|"
+		print line.strip("|")
+
+def parse_ref():
+	url = "https://en.wikipedia.org/wiki/List_of_Internet_exchange_points"
+	tag_parser = TagParser("ol")
+	tag_parser.feed(urllib.urlopen(url).read())
+	html=tag_parser.tag_list[-1]
+
+	parser = WikiRefParser()
+	parser.feed(html)
+	return parser.cites
+
+def parse_ixp(cites):
+	url = "https://en.wikipedia.org/wiki/List_of_Internet_exchange_points"
+	tag_parser = TagParser("table")
+	tag_parser.feed(urllib.urlopen(url).read())
+	html=tag_parser.tag_list[0]
+
+	parser = WikiIXPParser()
+	parser.feed(html)
 	for l in parser.lines:
 		fields=l.split('|')
 		name=fields[2]

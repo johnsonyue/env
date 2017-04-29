@@ -15,11 +15,11 @@ def download_pch(dst_dir):
 	for i in range(len(url_list)):
 		url=url_list[i]
 		f=file_list[i]
-		print "downloading %s" % (f),
+		print " ... downloading %s ... " % (f),
 		sys.stdout.flush()
 		path=dst_dir+"/"+f
 		urllib.urlretrieve(url, path)
-		print " finished"
+		print "finished"
 
 def usage():
 	print "python pch.py $dst_dir"
