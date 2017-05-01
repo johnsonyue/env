@@ -50,41 +50,38 @@ def int2ip(i):
 		ip+=str(l[j])+"."
 	return ip.strip(".")
 
-def insert_edge(edge,src,dst,delay):
+def insert_edge(edge,src,dst):
 	if ( type(src)==type((1,1,1)) ):
 		return
 	elif ( type(dst)==type((1,1,1)) ):
 		dst=dst[2]
 		if(not edge.has_key((src,dst))):
-			edge[(src,dst)]=["I",delay]
-		elif(edge[(src,dst)][0]=="D"):
-			edge[(src,dst)][0]="B"
+			edge[(src,dst)]="I"
+		elif(edge[(src,dst)]=="D"):
+			edge[(src,dst)]="B"
 	else:
 		if(not edge.has_key((src,dst))):
-			edge[(src,dst)]=["D",delay]
-		elif(edge[(src,dst)][0]=="I"):
-			edge[(src,dst)][0]="B"
+			edge[(src,dst)]="D"
+		elif(edge[(src,dst)]=="I"):
+			edge[(src,dst)]="B"
 
 def store(team, date, true_date, monitor, node, edge, data_dir):
 	path="%s/%s"%(data_dir,date)
 	if ( not os.path.exists(path) ):
 		os.makedirs(path)
 	
-	fn="%s/%s.%s.%s.herpes_node.gz" % (path,team,true_date,monitor)
-	fn2="%s/%s.%s.%s.herpes_link.gz" % (path,team,true_date,monitor)
+	fn="%s/%s.%s.%s.herpes.gz" % (path,team,true_date,monitor)
 	fp=open(fn,'w')
-	fp2=open(fn2,'w')
 	h = subprocess.Popen(['gzip', '-c', '-'], stdin=subprocess.PIPE, stdout=fp)
-	h2 = subprocess.Popen(['gzip', '-c', '-'], stdin=subprocess.PIPE, stdout=fp2)
 	
+	h.stdin.write( "%s %s\n" % ( len(node), len(edge) ) )
         for i in sorted( node.iterkeys() ):
 		t=node[i]
 		t="R" if t=='r' else "H"
 		h.stdin.write( "%s, %s\n" % ( node2str(i), t ) )
         for e,c in sorted(edge.iteritems(), key=lambda (k,v):(k[0],k[1])):
-                h2.stdin.write( "%s %s %s %s\n" % ( node2str(e[0]), node2str(e[1]), c[0], c[1] ) )
+                h.stdin.write( "%s %s %s\n" % ( node2str(e[0]), node2str(e[1]), c ) )
 	h.stdin.close()
-	h2.stdin.close()
 
 def build_graph(data_dir):
 	node={}
@@ -98,7 +95,6 @@ def build_graph(data_dir):
         while True:
                 try:
                         prev_node = -1
-                        prev_rtt = -1
                         line = raw_input()
                         if ( line.split(trace.header_delimiter)[0] == trace.header_indicator ):
                                 t = time.time()
@@ -138,20 +134,16 @@ def build_graph(data_dir):
 			reply_list = hop_list[0].split(trace.reply_delimiter)
 			first_reply = reply_list[0]
 			ip = first_reply.split(trace.ip_delimiter)[trace.hop_index["ip"]]
-			rtt = float(first_reply.split(trace.ip_delimiter)[trace.hop_index["rtt"]])
 			node_blank = -1
-			rtt_blank = -1
                         for i in range(len(hop_list)):
 				h=hop_list[i]
                                 if h == trace.blank_holder:
 					blank_cnt+=1
 					prev_node=-1
-					prev_rtt=-1
                                         continue #blank
                                 reply_list = h.split(trace.reply_delimiter)
                                 first_reply = reply_list[0]
                                 ip = first_reply.split(trace.ip_delimiter)[trace.hop_index["ip"]]
-                                rtt = float(first_reply.split(trace.ip_delimiter)[trace.hop_index["rtt"]])
 				ind=ip2int(ip)
 				if ( i == len(hop_list)-1 and ip==dst_ip ): #if target is reached 
 					node[ind] = "t"
@@ -161,17 +153,13 @@ def build_graph(data_dir):
 				if ( prev_node == -1 and node_blank != -1): #if prev is blank
 					blank=(node_blank,blank_cnt,ind)
 					node[blank] = "r"
-					delay=rtt-rtt_blank
-					insert_edge(edge,node_blank,blank,rtt_blank/2)
-					insert_edge(edge,blank,ind,rtt_blank/2) #divide in halves
+					insert_edge(edge,node_blank,blank)
+					insert_edge(edge,blank,ind)
 				elif ( prev_node != -1):
-					delay=rtt-prev_rtt
-					insert_edge(edge,prev_node,ind,delay)
+					insert_edge(edge,prev_node,ind)
 
                                 prev_node = ind
-				prev_rtt = rtt
 				node_blank = ind
-				rtt_blank = rtt
                 except EOFError:
 			store(team, date, true_date, monitor, node, edge, data_dir)
 

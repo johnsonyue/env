@@ -41,108 +41,104 @@ def edge_line_cmp(line1, line2):
 	else:
 		return node_line_cmp(tuple1[1], tuple2[1])
 
-def merge(file1, file2, file_out):
+def merge_node(file1, file2, file_out):
 	#open files.
 	fp1 = open(file1, 'r')
-	line1=fp1.readline()
-	num_node1=int(line1.split(' ')[0])
-	num_edge1=int(line1.split(' ')[1])
-
 	fp2=open(file2,'r')
-	line2=fp2.readline()
-	num_node2=int(line2.split(' ')[0])
-	num_edge2=int(line2.split(' ')[1])
 	
 	file_out_temp=file_out+".temp"
-	fpot=open(file_out_temp,'w')
+	fpo=open(file_out,'w')
 	
 	#merge node.
 	node_cnt=0
-	edge_cnt=0
 
 	line1=fp1.readline()
 	line2=fp2.readline()
-	while (num_node1>0 and num_node2>0):
+	while (line1!='' and line2!=''):
 		cmp = node_line_cmp(line1,line2)
 		if (cmp < 0):
-			fpot.write(line1)
-			num_node1-=1
+			fpo.write(line1)
 			line1=fp1.readline()
 		elif (cmp > 0):
-			fpot.write(line2)
-			num_node2-=1
+			fpo.write(line2)
 			line2=fp2.readline()
 		else:
-			fpot.write(line1)
-			num_node1-=1
-			num_node2-=1
+			fpo.write(line1)
 			line1=fp1.readline()
 			line2=fp2.readline()
 		node_cnt+=1
 		
-	while (num_node1>0):
-		fpot.write(line1)
-		num_node1-=1
+	while (line1!=''):
+		fpo.write(line1)
 		line1=fp1.readline()
 		node_cnt+=1
 		
-	while (num_node2>0):
-		fpot.write(line2)
-		num_node2-=1
+	while (line2!=''):
+		fpo.write(line2)
 		line2=fp2.readline()
 		node_cnt+=1
 	
-	#merge edge
-	while (num_edge1>0 and num_edge2>0):
-		cmp = edge_line_cmp(line1,line2)
-		if (cmp < 0):
-			fpot.write(line1)
-			num_edge1-=1
-			line1=fp1.readline()
-		elif (cmp > 0):
-			fpot.write(line2)
-			num_edge2-=1
-			line2=fp2.readline()
-		else:
-			edge_field=line1.split(' ')[:-1]
-			edge_num1=int(line1.split(' ')[-1])
-			edge_num2=int(line2.split(' ')[-1])
-			line=edge_field[0]+" "+edge_field[1]+" "+str(edge_num1+edge_num2)+"\n"
-			fpot.write(line)
-			num_edge1-=1
-			num_edge2-=1
-			line1=fp1.readline()
-			line2=fp2.readline()
-		edge_cnt+=1
-
-	while (num_edge1>0):
-		fpot.write(line1)
-		num_edge1-=1
-		line1=fp1.readline()
-		edge_cnt+=1
-
-	while (num_edge2>0):
-		fpot.write(line2)
-		num_edge2-=1
-		line2=fp2.readline()
-		edge_cnt+=1
-	fpot.close()
-
-	fpot=open(file_out_temp,'r')
-	fpo=open(file_out,'w')
-	fpo.write( "%s %s\n" % (node_cnt, edge_cnt) )
-	fpo.write(fpot.read())
+		fpo.close()
 
 	#clear up.
 	fp1.close()
 	fp2.close()
-	fpot.close()
 	fpo.close()
 	
-	os.remove(file_out_temp)
+	return node_cnt
+	
+def merge_edge(file1, file2, file_out):
+	#open files.
+	fp1 = open(file1, 'r')
+	fp2=open(file2,'r')
+	fpo=open(file_out,'w')
 
-def gunzip(data_dir):
-	file_list = os.popen( "ls %s/*.gz" % (data_dir) ).readlines()
+	#merge edge
+	edge_cnt=0
+	
+	line1=fp1.readline()
+	line2=fp2.readline()
+	while (line1!='' and line2!=''):
+		cmp = edge_line_cmp(line1,line2)
+		if (cmp < 0):
+			fpo.write(line1)
+			line1=fp1.readline()
+		elif (cmp > 0):
+			fpo.write(line2)
+			line2=fp2.readline()
+		else:
+			edge_field=line1.split(' ')[0:2]
+			edge_num1=int(line1.split(' ')[2])
+			edge_num2=int(line2.split(' ')[2])
+			num=edge_num1+edge_num2
+			delay1=float(line1.split(' ')[3])
+			delay2=float(line2.split(' ')[3])
+			delay=delay1 if delay1 < delay2 else delay2
+			line="%s %s %s %s\n" % (edge_field[0], edge_field[1], num, delay)
+			fpo.write(line)
+			line1=fp1.readline()
+			line2=fp2.readline()
+		edge_cnt+=1
+
+	while (line1!=''):
+		fpo.write(line1)
+		line1=fp1.readline()
+		edge_cnt+=1
+
+	while (line2!=''):
+		fpo.write(line2)
+		line2=fp2.readline()
+		edge_cnt+=1
+
+	#clear up.
+	fp1.close()
+	fp2.close()
+	fpo.close()
+	
+	return edge_cnt
+	
+def gunzip(data_dir,file_type):
+	file_list = os.popen( "ls %s/*.%s.gz" % (data_dir, file_type) ).readlines()
 	file_list = map(lambda x:x.strip('\n').split('/')[-1], file_list)
 	ret_list = []
 	for f in file_list:
@@ -160,37 +156,48 @@ def main(argv):
 		exit()
 
 	data_dir=argv[1]
-	#file_list = os.popen( "ls %s" % (data_dir) ).readlines()
-	#file_list = map(lambda x:x.strip('\n'), file_list)
-	file_list = gunzip(data_dir)
+	node_list = gunzip(data_dir,"node")
+	edge_list = gunzip(data_dir,"link")
 	
-	prev_file_list=[]
-	while (len(file_list)>1):
-		temp_file_list=[]
-		for i in range(len(file_list)/2):
-			out_file="%s.%s.out" % (len(file_list), i)
-			print ("merge %s %s into %s" % (data_dir+"/"+file_list[2*i], data_dir+"/"+file_list[2*i+1], data_dir+"/"+out_file)),
+	prev_node_list=[]
+	prev_edge_list=[]
+	while (len(node_list)>1):
+		temp_node_list=[]
+		temp_edge_list=[]
+		for i in range(len(node_list)/2):
+			out_node_file="%s.%s.node.out" % (len(node_list), i)
+			out_edge_file="%s.%s.edge.out" % (len(edge_list), i)
+			print ("merge %s %s into %s" % (data_dir+"/"+node_list[2*i], data_dir+"/"+node_list[2*i+1], data_dir+"/"+out_node_file)),
 			sys.stdout.flush()
-			merge(data_dir+"/"+file_list[2*i], data_dir+"/"+file_list[2*i+1], data_dir+"/"+out_file)
+			merge_node(data_dir+"/"+node_list[2*i], data_dir+"/"+node_list[2*i+1], data_dir+"/"+out_node_file)
+			merge_edge(data_dir+"/"+edge_list[2*i], data_dir+"/"+edge_list[2*i+1], data_dir+"/"+out_edge_file)
 			print "done"
-			temp_file_list.append(out_file)
+			temp_node_list.append(out_node_file)
+			temp_edge_list.append(out_edge_file)
 		#remember to handle the odd.
-		if (len(file_list)%2 != 0):
-			out_file="%s.%s.out" % (len(file_list), len(file_list)/2)
-			print ("merge %s into %s" % (data_dir+"/"+file_list[len(file_list)-1], data_dir+"/"+out_file)),
+		if (len(node_list)%2 != 0):
+			out_node_file="%s.%s.node.out" % (len(node_list), len(node_list)/2)
+			out_edge_file="%s.%s.edge.out" % (len(edge_list), len(edge_list)/2)
+			print ("merge %s into %s" % (data_dir+"/"+node_list[len(node_list)-1], data_dir+"/"+out_node_file)),
 			sys.stdout.flush()
-			os.system( "cp %s %s" % (data_dir+"/"+file_list[len(file_list)-1], data_dir+"/"+out_file) )
+			os.system( "cp %s %s" % (data_dir+"/"+node_list[len(node_list)-1], data_dir+"/"+out_node_file) )
+			os.system( "cp %s %s" % (data_dir+"/"+edge_list[len(edge_list)-1], data_dir+"/"+out_edge_file) )
 			print "done"
-			temp_file_list.append(out_file)
+			temp_node_list.append(out_node_file)
+			temp_edge_list.append(out_edge_file)
 
-		for i in range(len(prev_file_list)):
-			os.remove(data_dir+"/"+prev_file_list[i])
+		for i in range(len(prev_node_list)):
+			os.remove(data_dir+"/"+prev_node_list[i])
+			os.remove(data_dir+"/"+prev_edge_list[i])
 		
-		prev_file_list=file_list
-		file_list=temp_file_list
+		prev_node_list=node_list
+		prev_edge_list=edge_list
+		node_list=temp_node_list
+		edge_list=temp_edge_list
 
-	for i in range(len(prev_file_list)):
-		os.remove(data_dir+"/"+prev_file_list[i])
+	for i in range(len(prev_node_list)):
+		os.remove(data_dir+"/"+prev_node_list[i])
+		os.remove(data_dir+"/"+prev_edge_list[i])
 
 if __name__ == "__main__":
 	main(sys.argv)

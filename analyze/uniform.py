@@ -62,8 +62,11 @@ def uniform_caida():
 				hops = build_hops(hops_field,replied,dst_ip,dst_rtt)
 				
 				print trace.build_trace_str(dst_ip, timestamp, hops)
-		except Exception, e:
+		except EOFError:
 			break
+		except Exception, e:
+			sys.stderr.write(str(e)+"\n")
+			exit()
 		
 	sys.stderr.write("Finished parsing caida.\n")
 
