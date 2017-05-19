@@ -5,6 +5,7 @@ import json
 import math
 import time
 import datetime
+import subprocess
 
 import multi_thread
 
@@ -37,7 +38,7 @@ def download_ripe_atlas_detail_worker(url, temp_list, ind, proxy=""):
 			os.remove(dir+file)
 	
 	if res:
-		print url.split('/')[-1] + " " + proxy + " " + str(res) + " succeeded"
+		print url.split('/')[-1] + " " + proxy + " " + str(res) + " succeeded " + str(ind)
 
 	temp_list[ind]=text
 	return res
@@ -172,9 +173,11 @@ def download_date(date, root_dir="data/", proxy_file="", mt_num=-1):
 	#run with multi thread.
 	multi_thread.run_with_multi_thread(download_ripe_atlas_detail_worker_wrapper, argv_list, proxy_list, mt_num)
 	
+	print "writting to file ... "
 	for i in range(len(result_list)):
 		result_list[i]["results_json"]=temp_list[i]
 	file=date+".ripe"
-	fp = open(dir+"/"+file, 'wb')
-	fp.write(json.dumps(result_list))
+	fp = open(dir+"/"+file+".ripe.tar.gz", 'wb')
+	h = subprocess.Popen(['gzip', '-c', '-'], stdin=subprocess.PIPE, stdout=fp)
+	h.stdin.write(json.dumps(result_list,indent=1))
 	fp.close()
