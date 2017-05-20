@@ -182,8 +182,8 @@ def get_path(src, dst, prev):
 	return path[::-1]
 
 def print_warts(graph, path, path_graph):
-	src=path[0]
-	dst=path[-1]
+	src=graph.nodes[path[0]].ip
+	dst=graph.nodes[path[-1]].ip
 	prob_reply=0.5
 	replied='R' if random.random()<=prob_reply else 'N'
 	dst_rtt=0
