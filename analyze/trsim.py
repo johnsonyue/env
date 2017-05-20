@@ -61,6 +61,7 @@ class Edge():
 		self.ind_in = ind_in
 		self.ind_out = ind_out
 		self.delay = delay
+		self.is_direct = True
 
 class Graph():
 	def __init__(self):
@@ -72,12 +73,14 @@ class Graph():
 	
 	def add_node(self, node):
 		#print "Add node: %s" % (node.ip), #debug
-		if (not self.node_dict.has_key(node)):
+		if (not self.node_dict.has_key(node.ip)):
 			index=len(self.nodes)
-			self.node_dict[node]=index
+			self.node_dict[node.ip]=index
 			self.nodes.append(node)
 		#print " %s" % (index) #debug
-		return index
+			return index
+		else:
+			return self.node_dict[node.ip]
 	
 	def add_edge(self, edge):
 		#print "Add edge: %s, %s" % (edge.ind_in, edge.ind_out) #debug
@@ -181,7 +184,7 @@ def get_path(src, dst, prev):
 		path.append(dst)
 	return path[::-1]
 
-def print_warts(graph, path, path_graph):
+def print_warts(graph, path):
 	src=graph.nodes[path[0]].ip
 	dst=graph.nodes[path[-1]].ip
 	prob_reply=0.5
@@ -197,12 +200,14 @@ def print_warts(graph, path, path_graph):
 
 	prob_star=0.1
 	hop_list=[]
+	star_list=[]
 	is_no_star=True
-	for i in range(1,len(path)-1):
+	for i in range(1,len(path)):
 		p=path[i]
 		hop="%s,%s,%s" % (graph.nodes[p].ip,rtt_list[i-1],1) 
 		if random.random()<=prob_star:
 			hop="q"
+			star_list.append(i)
 			is_no_star=False
 		hop_list.append(hop)
 	complete='C' if is_no_star else 'I'
@@ -211,9 +216,46 @@ def print_warts(graph, path, path_graph):
 	for h in hop_list:
 		sys.stdout.write( "\t%s" % (h) )
 	sys.stdout.write('\n')
-	
-	return
 
+	return star_list,rtt_list
+
+def insert_path(graph, path_graph, path, star_list, rtt_list):
+	i=0
+	while (i<len(path)-1) and (i in star_list):
+		i+=1
+	while i<len(path)-1:
+		j=i+1
+		is_direct=True
+		while (j<len(path)-1) and (j in star_list):
+			is_direct=False
+			j+=1
+
+		#add node
+		src=path[i]
+		src_node=Node(graph.nodes[src].ip)
+		path_graph.add_node(src_node)
+
+		dst=path[j]
+		dst_node=Node(graph.nodes[dst].ip)
+		path_graph.add_node(dst_node)
+		
+		#ind
+		src_ind=path_graph.node_dict[src_node.ip]
+		dst_ind=path_graph.node_dict[dst_node.ip]
+
+		#delay
+		if is_direct:
+			edge_ind=graph.edge_dict[(src,dst)]
+			delay=graph.edges[edge_ind].delay
+		else:
+			delay=rtt_list[j-1]-rtt_list[i-1]
+		#is_direct
+		edge=Edge(src_ind, dst_ind, delay)
+		edge.is_direct=is_direct
+		path_graph.add_edge(edge)
+
+		i=j
+	
 def generate_paths(graph, num_path, num_per_src):
 	host_list = []
 	for i in range(len(graph.nodes)):
@@ -236,12 +278,48 @@ def generate_paths(graph, num_path, num_per_src):
 
 		#print get_path(src,dst,prev) #debug
 		path=get_path(src,dst,prev)
-		print_warts(graph,path,path_graph)
+		star_list,rtt_list=print_warts(graph,path)
+		insert_path(graph,path_graph,path,star_list,rtt_list)
+		
 		i+=1
+	
+	return path_graph
+
+def dump_graph(path_graph, graph_file_name):
+	fp=open(graph_file_name+".nodes",'wb')
+	for i in range(len(path_graph.nodes)):
+		n=path_graph.nodes[i]
+		if path_graph.get_degree(i) == 1:
+			fp.write("%s, H\n" % (n.ip))
+		else:
+			fp.write("%s, R\n" % (n.ip))
+	fp.close()
+
+	fp=open(graph_file_name+".links",'wb')
+	for i in range(len(path_graph.edges)):
+		e=path_graph.edges[i]
+		ip_in=path_graph.nodes[e.ind_in].ip
+		ip_out=path_graph.nodes[e.ind_out].ip
+		if e.is_direct:
+			fp.write("%s %s D %s\n" % (ip_in, ip_out, e.delay))
+		else:
+			fp.write("%s %s I %s\n" % (ip_in, ip_out, e.delay))
+	fp.close()
+
+def usage():
+	print "python trsim.py $graph_file"
+	exit()
 
 def main(argv):
-	sf_graph=generate_scale_free_graph(3000)
-	generate_paths(sf_graph,300,10)
+	if len(argv) < 2:
+		usage()
+	
+	graph_file_name=argv[1]
 
+	sf_graph=generate_scale_free_graph(1000)
+	path_graph=generate_paths(sf_graph,100,10)
+	
+	dump_graph(path_graph, graph_file_name)
+	
 if __name__ == "__main__":
 	main(sys.argv)
