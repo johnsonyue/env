@@ -176,7 +176,8 @@ def dijkstra(graph, src):
 def get_path(src, dst, prev):
 	path=[dst]
 	while dst!=src:
-		dst=prev[dst]
+		if dst != None:
+			dst=prev[dst]
 		path.append(dst)
 	return path[::-1]
 
@@ -240,7 +241,7 @@ def generate_paths(graph, num_path, num_per_src):
 
 def main(argv):
 	sf_graph=generate_scale_free_graph(3000)
-	generate_paths(sf_graph,1000,10)
+	generate_paths(sf_graph,300,10)
 
 if __name__ == "__main__":
 	main(sys.argv)
