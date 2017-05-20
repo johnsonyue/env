@@ -206,11 +206,11 @@ def print_warts(graph, path, path_graph):
 			is_no_star=False
 		hop_list.append(hop)
 	complete='C' if is_no_star else 'I'
-	print "T\t%s\t%s\t00000000\t00000000\t00000000\t%s\t%s\t0\t0\tS\t0\t%s" \
-	% ( src, dst, replied, dst_rtt, complete ),
+	sys.stdout.write( "T\t%s\t%s\t00000000\t00000000\t00000000\t%s\t%s\t0\t0\tS\t0\t%s" \
+	% ( src, dst, replied, dst_rtt, complete ) )
 	for h in hop_list:
-		print "\t%s" % (h),
-	print
+		sys.stdout.write( "\t%s" % (h) )
+	sys.stdout.write('\n')
 	
 	return
 

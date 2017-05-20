@@ -1,5 +1,5 @@
 #! /bin/bash
-if [ $# -ne 3 ]; then
+if [ $# -lt 3 ]; then
 	echo "./decode.sh <source> <data_dir> <dates>" >&2
 	exit
 fi
@@ -100,6 +100,16 @@ decode_text(){
 	done
 }
 
+decode_text_file(){
+	fn=$1
+	team="noteam"
+	monitor="nomonitor"
+	true_date="notruedate"
+	python -c "import trace; trace.print_header(\""$source"\",\""$team"\",\""$d"\",\""$true_date"\",\""$monitor"\",\"*\")"
+
+	cat $fn
+}
+
 if [ $source = "caida" ]; then
 	decode_caida
 elif [ $source = "iplane" ]; then
@@ -110,4 +120,6 @@ elif [ $source = "warts" ]; then
 	decode_warts
 elif [ $source = "text" ]; then
 	decode_text
+elif [ $source = "text_file" ]; then
+	decode_text_file $3
 fi
