@@ -54,8 +54,7 @@ class Node():
 	def __init__(self, ip):
 		self.ip = ip
 		self.adj_list = {}
-		self.is_anonymouse = False
-		self.is_reply = True
+		self.is_router = True
 class Edge():
 	def __init__(self, ind_in, ind_out, delay):
 		self.ind_in = ind_in
@@ -202,7 +201,7 @@ def print_warts(graph, path):
 	hop_list=[]
 	star_list=[]
 	is_no_star=True
-	for i in range(1,len(path)):
+	for i in range(1,len(path)-1):
 		p=path[i]
 		hop="%s,%s,%s" % (graph.nodes[p].ip,rtt_list[i-1],1) 
 		if random.random()<=prob_star:
@@ -210,6 +209,14 @@ def print_warts(graph, path):
 			star_list.append(i)
 			is_no_star=False
 		hop_list.append(hop)
+	
+	i=len(path)-1
+	p=path[i]
+	if replied == 'R':
+		hop="%s,%s,%s" % (graph.nodes[p].ip,rtt_list[i-1],1) 
+		hop_list.append(hop)
+	else:
+		star_list.append(i)
 	complete='C' if is_no_star else 'I'
 	sys.stdout.write( "T\t%s\t%s\t00000000\t00000000\t00000000\t%s\t%s\t0\t0\tS\t0\t%s" \
 	% ( src, dst, replied, dst_rtt, complete ) )
@@ -220,13 +227,13 @@ def print_warts(graph, path):
 	return star_list,rtt_list
 
 def insert_path(graph, path_graph, path, star_list, rtt_list):
-	i=0
+	i=1
 	while (i<len(path)-1) and (i in star_list):
 		i+=1
 	while i<len(path)-1:
 		j=i+1
 		is_direct=True
-		while (j<len(path)-1) and (j in star_list):
+		while (j<len(path)) and (j in star_list):
 			is_direct=False
 			j+=1
 
@@ -235,24 +242,31 @@ def insert_path(graph, path_graph, path, star_list, rtt_list):
 		src_node=Node(graph.nodes[src].ip)
 		path_graph.add_node(src_node)
 
-		dst=path[j]
-		dst_node=Node(graph.nodes[dst].ip)
-		path_graph.add_node(dst_node)
+		if j<len(path):
+			dst=path[j]
+			dst_node=Node(graph.nodes[dst].ip)
+			if j==len(path)-1:
+				dst_node.is_router=False
+			path_graph.add_node(dst_node)
 		
-		#ind
-		src_ind=path_graph.node_dict[src_node.ip]
-		dst_ind=path_graph.node_dict[dst_node.ip]
+			if not is_direct:
+				star_node=Node( str((src_node.ip,j-i-1,dst_node.ip)).replace('\'','').replace(' ','') )
+				path_graph.add_node(star_node)
+			
+			#ind
+			src_ind=path_graph.node_dict[src_node.ip]
+			dst_ind=path_graph.node_dict[dst_node.ip]
 
-		#delay
-		if is_direct:
-			edge_ind=graph.edge_dict[(src,dst)]
-			delay=graph.edges[edge_ind].delay
-		else:
-			delay=rtt_list[j-1]-rtt_list[i-1]
-		#is_direct
-		edge=Edge(src_ind, dst_ind, delay)
-		edge.is_direct=is_direct
-		path_graph.add_edge(edge)
+			#delay
+			if is_direct:
+				edge_ind=graph.edge_dict[(src,dst)]
+				delay=graph.edges[edge_ind].delay
+			else:
+				delay=rtt_list[j-1]-rtt_list[i-1]
+			#is_direct
+			edge=Edge(src_ind, dst_ind, delay)
+			edge.is_direct=is_direct
+			path_graph.add_edge(edge)
 
 		i=j
 	
@@ -289,7 +303,7 @@ def dump_graph(path_graph, graph_file_name):
 	fp=open(graph_file_name+".nodes",'wb')
 	for i in range(len(path_graph.nodes)):
 		n=path_graph.nodes[i]
-		if path_graph.get_degree(i) == 1:
+		if not n.is_router:
 			fp.write("%s, H\n" % (n.ip))
 		else:
 			fp.write("%s, R\n" % (n.ip))
