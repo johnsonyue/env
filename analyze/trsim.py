@@ -283,7 +283,7 @@ def generate_paths(graph, num_path, num_per_src):
 	path_graph=Graph()
 	path_list=[]
 	i=0
-	while i<=num_path:
+	while i<num_path:
 		if i%num_per_src == 0:
 			src=random.randint(0,len(host_list)-1)
 			prev=dijkstra(graph,src)
