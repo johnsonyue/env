@@ -139,9 +139,11 @@ def build_graph(data_dir):
 		line_dict=parse_line(line)
 		dst_ip=line_dict["dst_ip"]
 		hops=line_dict["hops"]
+		#print hops #debug
 
 		#handle traceroute hops.
 		hop_list = hops.split(trace.hop_delimiter)
+		#print hop_list #debug
 		i=0
 		while (i<=len(hop_list)-1): #ignore preceding blanks.
 			hop_dict=parse_hop(hop_list[i])
@@ -157,24 +159,29 @@ def build_graph(data_dir):
 					break
 				is_direct=False
 				j+=1
+			#print "i:%s, j:%s" % (i, j) #debug
 
 			#add node
 			hop_dict=parse_hop(hop_list[i])
 			ip=hop_dict["ip"]
 			rtt_i=hop_dict["rtt"]
 			node_i=model.Node(ip)
-			if i==len(hop_list)-1 and dst_ip==ip: #check if hop is host.
-				node_i.is_router=False
 			ind_i=graph.add_node(node_i)
+			#print "ip:%s, ind_i:%s" % (ip, ind_i) #debug
+			if i==len(hop_list)-1 and dst_ip==ip: #check if hop is host.
+				#print "is not router" #debug
+				graph.nodes[ind_i].is_router=False
 
 			if j<len(hop_list):
 				hop_dict=parse_hop(hop_list[j])
 				ip=hop_dict["ip"]
 				rtt_j=hop_dict["rtt"]
 				node_j=model.Node(ip)
-				if j==len(hop_list)-1 and dst_ip==ip: #check if hop is host.
-					node_j.is_router=False
 				ind_j=graph.add_node(node_j)
+				#print "ip:%s, ind_i:%s" % (ip, ind_i) #debug
+				if j==len(hop_list)-1 and dst_ip==ip: #check if hop is host.
+					#print "is not router" #debug
+					graph.nodes[ind_j].is_router=False
 
 				if not is_direct:
 					blank=(ind_i,j-i-1,ind_j)

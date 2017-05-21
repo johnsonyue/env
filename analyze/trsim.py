@@ -221,7 +221,10 @@ def print_warts(graph, path):
 	complete='C' if is_no_star else 'I'
 	sys.stdout.write( "T\t%s\t%s\t00000000\t00000000\t00000000\t%s\t%s\t0\t0\tS\t0\t%s" \
 	% ( src, dst, replied, dst_rtt, complete ) )
-	for h in hop_list:
+	for h in hop_list[:-1]:
+		sys.stdout.write( "\t%s" % (h) )
+	if replied == 'N' and len(hop_list)!=0:
+		h=hop_list[-1]
 		sys.stdout.write( "\t%s" % (h) )
 	sys.stdout.write('\n')
 
@@ -229,9 +232,9 @@ def print_warts(graph, path):
 
 def insert_path(graph, path_graph, path, star_list, rtt_list):
 	i=1
-	while (i<len(path)-1) and (i in star_list):
+	while (i<=len(path)-1) and (i in star_list):
 		i+=1
-	while i<len(path)-1:
+	while i<=len(path)-1:
 		j=i+1
 		is_direct=True
 		while (j<len(path)) and (j in star_list):
@@ -287,12 +290,12 @@ def generate_paths(graph, num_path, num_per_src):
 			dst_list=[src]
 		while True:
 			dst=random.randint(0,len(host_list)-1)
+			dst=host_list[dst]
 			if dst in dst_list:
 				continue
 			dst_list.append(dst)
 			break
 
-		#print get_path(src,dst,prev) #debug
 		path=get_path(src,dst,prev)
 		star_list,rtt_list=print_warts(graph,path)
 		insert_path(graph,path_graph,path,star_list,rtt_list)
@@ -327,9 +330,9 @@ def dump_graph(path_graph, graph_file_name):
 		ip_in=path_graph.nodes[e.ind_in].ip
 		ip_out=path_graph.nodes[e.ind_out].ip
 		if e.is_direct:
-			fp.write("%s %s D %s\n" % (ip_in, ip_out, e.delay))
+			fp.write( "%s %s D %s\n" % (ip_in, ip_out, float(e.delay)) )
 		else:
-			fp.write("%s %s I %s\n" % (ip_in, ip_out, e.delay))
+			fp.write( "%s %s I %s\n" % (ip_in, ip_out, float(e.delay)) )
 	fp.close()
 
 def export_to_pickle(obj, file_name):
@@ -355,8 +358,8 @@ def main(argv):
 	graph_file_name=argv[2]
 	pickle_file_name=argv[3]
 	
-	num_nodes=1000
-	num_paths=100
+	num_nodes=3000
+	num_paths=500
 	num_per_src=10
 	
 	if action == "new":
