@@ -1,6 +1,7 @@
 import sys
 import math
 import random
+import pickle
 
 def is_ip_ligit(ip):
 	decs=ip.split('.')
@@ -277,6 +278,7 @@ def generate_paths(graph, num_path, num_per_src):
 			host_list.append(i)
 	
 	path_graph=Graph()
+	path_list=[]
 	i=0
 	while i<=num_path:
 		if i%num_per_src == 0:
@@ -294,9 +296,19 @@ def generate_paths(graph, num_path, num_per_src):
 		path=get_path(src,dst,prev)
 		star_list,rtt_list=print_warts(graph,path)
 		insert_path(graph,path_graph,path,star_list,rtt_list)
+		path_list.append((path,star_list,rtt_list))
 		
 		i+=1
 	
+	return path_graph, path_list
+
+def reload_paths(graph,path_list):
+	path_graph=Graph()
+	for p in path_list:
+		path=p[0]
+		star_list=p[1]
+		rtt_list=p[2]
+		insert_path(graph,path_graph,path,star_list,rtt_list)
 	return path_graph
 
 def dump_graph(path_graph, graph_file_name):
@@ -320,20 +332,46 @@ def dump_graph(path_graph, graph_file_name):
 			fp.write("%s %s I %s\n" % (ip_in, ip_out, e.delay))
 	fp.close()
 
+def export_to_pickle(obj, file_name):
+	fp=open(file_name+".pkl",'wb')
+	pickle.dump(obj,fp)
+	fp.close()
+
+def import_from_pickle(file_name):
+	fp=open(file_name+".pkl", 'rb')
+	obj=pickle.load(fp)
+	fp.close()
+	return obj
+
 def usage():
 	print "python trsim.py $graph_file"
 	exit()
 
 def main(argv):
-	if len(argv) < 2:
+	if len(argv) < 4:
 		usage()
 	
-	graph_file_name=argv[1]
-
-	sf_graph=generate_scale_free_graph(1000)
-	path_graph=generate_paths(sf_graph,100,10)
+	action=argv[1]
+	graph_file_name=argv[2]
+	pickle_file_name=argv[3]
 	
-	dump_graph(path_graph, graph_file_name)
+	num_nodes=1000
+	num_paths=100
+	num_per_src=10
+	
+	if action == "new":
+		sf_graph=generate_scale_free_graph(num_nodes)
+		path_graph,path_list=generate_paths(sf_graph,num_paths,num_per_src)
+		export_to_pickle([sf_graph,path_list], pickle_file_name) #export sf_graph & path_list.
+		
+		dump_graph(path_graph, graph_file_name)
+	elif action == "load":
+		obj=import_from_pickle(pickle_file_name)
+		sf_graph=obj[0]
+		path_list=obj[1]
+		
+		path_graph=reload_paths(sf_graph,path_list) #no need to export afterwards.
+		dump_graph(path_graph, graph_file_name)
 	
 if __name__ == "__main__":
 	main(sys.argv)
