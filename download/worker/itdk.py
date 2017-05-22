@@ -1,6 +1,7 @@
 import urllib2
 import json
 import os
+import re
 import sys
 import math
 import HTMLParser
@@ -84,7 +85,6 @@ def download_segemented_caida_restricted_worker(url, opener, dst_dir, file_name,
 	request.add_header( "Range", "bytes="+str(start)+"-"+str(end) )
 	request.add_header("User-agent", "Mozila/5.0")
 
-
 	print ("downloading "+file_name+" "+str(start/1024)+"K"+"-"+str(end/1024)+"K"+" with proxy "+proxy+" start:"+str(start)+" end:"+str(end))
 	sys.stdout.flush()
 	if(proxy != ""):
@@ -114,6 +114,8 @@ def download_segemented_caida_restricted_worker(url, opener, dst_dir, file_name,
 	if res:
 		print file_name + " " + proxy + " " + str(res) + " " + (str(ex) if ex!=None else "succeeded")
 		sys.stdout.flush()
+	
+	return res
 
 def assemble_segements(dst_dir, file_name):
 	print "assembling segements ... "
@@ -183,7 +185,7 @@ def download_page(url, dst_dir, username, password, proxy_file):
 	proxy_list = []
 	fp = open(proxy_file,'rb')
 	for line in fp.readlines():
-		proxy_list.append(line.strip('\n'))
+		proxy_list.append( [line.strip('\n')] )
 	fp.close()
 
 	file_list=get_page_files(url, username, password)
