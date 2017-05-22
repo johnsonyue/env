@@ -18,7 +18,7 @@ cd ../
 cp file.links $temp_dir
 cd $temp_dir
 gzip -cd noteam.notruedate.nomonitor.herpes_link.gz >save.links
-sort -n file.links>sort1
-sort -n save.links>sort2
-diff sort1 sort2
+sort -n file.links>sort3
+sort -n save.links>sort4
+diff sort3 sort4
 cd ../
