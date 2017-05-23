@@ -189,8 +189,7 @@ def download_page(url, dst_dir, username, password, proxy_file):
 	fp.close()
 
 	file_list=get_page_files(url, username, password)
-	#for f in file_list:
-	for f in file_list[1:2]: #debug
+	for f in file_list:
 		download_file(url+"/"+f, dst_dir, f, username, password, proxy_list, mt_num=3)
 
 def main():

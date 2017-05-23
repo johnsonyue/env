@@ -150,6 +150,12 @@ def build_graph(data_dir):
 			if (hop_dict.has_key("ip")):
 				break
 			i+=1
+		#add node
+		hop_dict=parse_hop(hop_list[i])
+		ip=hop_dict["ip"]
+		rtt_i=hop_dict["rtt"]
+		node_i=model.Node(ip)
+		ind_i=graph.add_node(node_i)
 		while i<=len(hop_list)-1:
 			j=i+1
 			is_direct=True
@@ -160,13 +166,7 @@ def build_graph(data_dir):
 				is_direct=False
 				j+=1
 			#print "i:%s, j:%s" % (i, j) #debug
-
-			#add node
-			hop_dict=parse_hop(hop_list[i])
-			ip=hop_dict["ip"]
-			rtt_i=hop_dict["rtt"]
-			node_i=model.Node(ip)
-			ind_i=graph.add_node(node_i)
+			
 			#print "ip:%s, ind_i:%s" % (ip, ind_i) #debug
 			if i==len(hop_list)-1 and dst_ip==ip: #check if hop is host.
 				#print "is not router" #debug
@@ -195,6 +195,8 @@ def build_graph(data_dir):
 				edge.is_direct=is_direct
 				graph.add_edge(edge)
 		
+			rtt_i=rtt_j
+			ind_i=ind_j
 			i=j
 
 def usage():
