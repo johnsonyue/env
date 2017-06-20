@@ -78,7 +78,7 @@ def merge_node(file1, file2, file_out):
 		line2=fp2.readline()
 		node_cnt+=1
 	
-		fpo.close()
+	fpo.close()
 
 	#clear up.
 	fp1.close()
@@ -108,13 +108,17 @@ def merge_edge(file1, file2, file_out):
 			line2=fp2.readline()
 		else:
 			edge_field=line1.split(' ')[0:2]
-			edge_num1=int(line1.split(' ')[2])
-			edge_num2=int(line2.split(' ')[2])
-			num=edge_num1+edge_num2
+			#edge_num1=int(line1.split(' ')[2])
+			#edge_num2=int(line2.split(' ')[2])
+			edge_type1=line1.split(' ')[2]
+			edge_type2=line2.split(' ')[2]
+			tp="I"
+			if edge_type1=="D" or edge_type2=="D":
+				tp="D"
 			delay1=float(line1.split(' ')[3])
 			delay2=float(line2.split(' ')[3])
 			delay=delay1 if delay1 < delay2 else delay2
-			line="%s %s %s %s\n" % (edge_field[0], edge_field[1], num, delay)
+			line="%s %s %s %s\n" % (edge_field[0], edge_field[1], tp, delay)
 			fpo.write(line)
 			line1=fp1.readline()
 			line2=fp2.readline()
@@ -138,7 +142,7 @@ def merge_edge(file1, file2, file_out):
 	return edge_cnt
 	
 def gunzip(data_dir,file_type):
-	file_list = os.popen( "ls %s/*.%s.gz" % (data_dir, file_type) ).readlines()
+	file_list = os.popen( "ls %s/*%s.gz" % (data_dir, file_type) ).readlines()
 	file_list = map(lambda x:x.strip('\n').split('/')[-1], file_list)
 	ret_list = []
 	for f in file_list:
