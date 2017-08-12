@@ -21,8 +21,8 @@ def main(argv):
 		proxy_file = config["worker"]["proxy_file"]
 		root_dir = config["worker"]["root_dir"]
 		date = ""
-		try:
-			while(True):
+		while(True):
+			try:
 				date = handler.get_task(data_source)
 				print date
 				sys.stdout.flush()
@@ -31,7 +31,7 @@ def main(argv):
 				print handler.notify_started(date,data_source),
 				sys.stdout.flush()
 		
-				caida.download_date(date, root_dir=root_dir, proxy_file=proxy_file, mt_num=2)
+				caida.download_date(date, root_dir=root_dir, proxy_file=proxy_file, mt_num=4)
 		
 				end_time = time.time()
 				time_used = end_time - start_time

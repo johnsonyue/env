@@ -171,11 +171,14 @@ def download_caida_restricted_worker(url, dir, file, username, password, proxy="
 	ex = None
 	try:
 		if not os.path.exists(dir+file):
+			print "Started downloading %s" % (dir+file)
 			f = opener.open(url, timeout=10)
 			fp = open(dir+file, 'wb')
 			fp.write(f.read())
 			fp.close()
 			f.close()
+		else:
+			print "Skipping existing file: %s" % (dir+file)
 	except Exception, e:
 		print e
 		res = False
