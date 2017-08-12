@@ -4,7 +4,15 @@ import sys
 
 from manager import manager
 
+def usage():
+	print "python scan.py <source>"
+
 def main(argv):
+	if (len(argv) <2):
+		usage()
+		exit()
+
+	source = argv[1]
 	config = json.loads(open("config.json").read())
 	state_file_name = config["manager"]["state_file_name"]
 	data_dir = config["worker"]["root_dir"]

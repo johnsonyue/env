@@ -20,10 +20,6 @@ def build_graph():
                                 tm = t
                                 continue
 
-                        if ( cnt <= 4999 ):
-                                cnt += 1
-                                continue
-
                         field_list = line.split(trace.field_delimiter)
                         #dst_ip = field_list[ trace.trace_index["dst_ip"] ]
                         #timestamp = field_list[ trace.trace_index["timestamp"] ]
