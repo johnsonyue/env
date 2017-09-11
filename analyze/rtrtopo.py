@@ -1,6 +1,7 @@
 import sys
 import getopt
 from sets import Set
+import subprocess
 
 router_list = []
 ip2router = {}
@@ -67,7 +68,7 @@ def process(alias,edge,prefix):
 	#write
 	with open(prefix+".node",'wb') as of:
 		for i in range(len(router_list)):
-			of.write( "Node" + str(i) + ":" )
+			of.write( "Node" + str(i) + "," )
 			r = router_list[i]
 			if_str = ""
 			for f in r:
@@ -79,12 +80,57 @@ def process(alias,edge,prefix):
 		for k,v in edge_dict.items():
 			of.write("Node" + str(k[0]) + ",Node" + str(k[1]))
 			for f in v:
-				of.write(" " + str(f))
+				of.write("," + str(f))
+			of.write("\n")
+	of.close()
+
+def extract(rid,iflist):
+	if len(iflist) <= 1:
+		return
+	router_list.append(Set(iflist))
+	for i in iflist:
+		ip2router[i] = rid
+
+def process_itdk(setfile,edge,prefix):
+	#read
+	with open(setfile,'rb') as sf:
+		h = subprocess.Popen(['gzip', '-c', '-d', '-'], stdin=sf, stdout=subprocess.PIPE)
+		for line in h.readlines():
+			if line[0] == "#":
+				continue
+			line=line.strip('\n')
+			extract(int(line.split(': ')[0].lstrip("Node")), line.split(': ')[1].split(' '))
+	af.close()
+
+	with open(edge,'rb') as ef:
+		for line in ef.readlines():
+			line=line.strip('\n')
+			insert(line.split(',')[0],line.split(',')[1],line.split(',')[2:])
+	ef.close()
+	
+	#write
+	with open(prefix+".node",'wb') as of:
+		for i in range(len(router_list)):
+			of.write( "Node" + str(i) + "," )
+			r = router_list[i]
+			if_str = ""
+			for f in r:
+				if_str += f+" "
+			of.write( if_str.strip(" ") + "\n")
+	of.close()
+
+	with open(prefix+".edge",'wb') as of:
+		for k,v in edge_dict.items():
+			of.write("Node" + str(k[0]) + ",Node" + str(k[1]))
+			for f in v:
+				of.write("," + str(f))
 			of.write("\n")
 	of.close()
 
 def usage():
-	print "rtrtopo -e <$edge-file> -a <$alias-file>"
+	print "rtrtopo -e <$edge-file> -a <$alias-file> -p <$prefix>"
+	print "  or"
+	print "rtrtopo -e <$edge-file> -s <$set-file> -p <$prefix>"
 
 def main(argv):
 	try:
@@ -95,6 +141,7 @@ def main(argv):
 		exit(2)
 
 	alias = ""
+	setfile = ""
 	edge = ""
 	prefix = "default"
 	for o,a in opts:
@@ -103,6 +150,8 @@ def main(argv):
 			exit(0)
 		elif o == "-a":
 			alias = a
+		elif o == "-s":
+			setfile = a
 		elif o == "-e":
 			edge = a
 		elif o == "-p":
@@ -110,6 +159,9 @@ def main(argv):
 		
 	if alias == "" or edge == "":
 		usage()
+		exit(2)
+	if alias != "" and setfile != "":
+		usasge()
 		exit(2)
 	
 	process(alias,edge,prefix)
