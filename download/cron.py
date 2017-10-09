@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from datetime import datetime, timedelta
 
 from manager import manager
 
@@ -37,6 +38,14 @@ def main(argv):
 		password = auth_info["password"]
 		date = iplane.get_latest_time_fromsite(username, password)
 		#date="20170303"
+		if ( not os.path.exists("%s" % (state_file_name)) ):
+			manager.update_state_file("%s" % (state_file_name), date, start_time="20070913",is_init=True);
+		else:
+			manager.update_state_file("%s" % (state_file_name), date, start_time="20070913");
+	elif (source == "ripeatlas"):
+		from worker import ripe_atlas
+		print "getting latest time ... "
+		date=(datetime.now()-timedelta(days=2)).strftime("%Y%m%d")
 		if ( not os.path.exists("%s" % (state_file_name)) ):
 			manager.update_state_file("%s" % (state_file_name), date, start_time="20070913",is_init=True);
 		else:

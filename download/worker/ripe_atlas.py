@@ -34,8 +34,6 @@ def download_ripe_atlas_detail_worker(url, temp_list, ind, proxy=""):
 	except Exception, e:
 		print e
 		res = False
-		if os.path.exists(dir+file):
-			os.remove(dir+file)
 	
 	if res:
 		print url.split('/')[-1] + " " + proxy + " " + str(res) + " succeeded " + str(ind)
@@ -177,7 +175,11 @@ def download_date(date, root_dir="data/", proxy_file="", mt_num=-1):
 	for i in range(len(result_list)):
 		result_list[i]["results_json"]=temp_list[i]
 	file=date+".ripe"
-	fp = open(dir+"/"+file+".ripe.tar.gz", 'wb')
+	fp = open(dir+"/"+file+".gz", 'wb')
 	h = subprocess.Popen(['gzip', '-c', '-'], stdin=subprocess.PIPE, stdout=fp)
-	h.stdin.write(json.dumps(result_list,indent=1))
+	#json.dump(result_list,h.stdin)
+	for i in range(len(result_list)):
+		h.stdin.write(json.dumps(result_list[i])+"\n")
+	h.stdin.close()
 	fp.close()
+	print "done"
