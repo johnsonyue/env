@@ -51,25 +51,24 @@ class BGPLGDBParser(HTMLParser.HTMLParser):
 		if (self.is_td and not self.is_script):
 			self.td+=data
 
-def parse_ixp_offline():
-	file_list=["ixp-database.html", "ixp-database-2.html"]
+def parse_ixp_offline(): #email field not available in webpage source code
+	ret_list = []
+	file_list=["ixp/ixp-database.html", "ixp/ixp-database-2.html"]
 	for f in file_list:
 		parser = BGPLGDBParser()
 		parser.feed(open(f,'rb').read())
 		for l in parser.lines:
-			print l
+			ret_list.append(l)
+
+	return ret_list
 
 def parse_ixp():
+	ret_list = []
 	url_list=["http://www.bgplookingglass.com/ixp-database", "http://www.bgplookingglass.com/ixp-database-2"]
 	for u in url_list:
 		parser = BGPLGDBParser()
 		parser.feed(urllib.urlopen(u).read())
 		for l in parser.lines:
-			print l
-
-def main(argv):
-	#parse_ixp()
-	parse_ixp_offline() #email field not available in webpage source code
-
-if __name__ == "__main__":
-	main(sys.argv)
+			ret_list.append(l)
+	
+	return ret_list

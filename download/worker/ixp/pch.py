@@ -21,19 +21,8 @@ def download_pch(dst_dir):
 		urllib.urlretrieve(url, path)
 		print "finished"
 
-def usage():
-	print "python pch.py $dst_dir"
-	exit()
-
-def main(argv):
-	if (len(argv) <2):
-		usage()
-
-	dst_dir = argv[1]
+def download_pch_wrapper(dst_dir):
 	dst_dir = dst_dir+"/pch"
 	if (not os.path.exists(dst_dir)):
 		os.makedirs(dst_dir)
 	download_pch(dst_dir)
-
-if __name__ == "__main__":
-	main(sys.argv)

@@ -182,6 +182,7 @@ def parse_ref_offline():
 	return parser.cites
 
 def parse_ixp_offline(cites):
+	ret_list = []
 	parser = WikiIXPParser()
 	parser.feed(open("list-of-ixp.html",'rb').read())
 	for l in parser.lines:
@@ -194,7 +195,9 @@ def parse_ixp_offline(cites):
 		line=""
 		for f in fields:
 			line+=f+"|"
-		print line.strip("|")
+		ret_list.append(line.strip("|"))
+
+	return ret_list
 
 def parse_ref():
 	url = "https://en.wikipedia.org/wiki/List_of_Internet_exchange_points"
@@ -207,6 +210,7 @@ def parse_ref():
 	return parser.cites
 
 def parse_ixp(cites):
+	ret_list = []
 	url = "https://en.wikipedia.org/wiki/List_of_Internet_exchange_points"
 	tag_parser = TagParser("table")
 	tag_parser.feed(urllib.urlopen(url).read())
@@ -224,11 +228,10 @@ def parse_ixp(cites):
 		line=""
 		for f in fields:
 			line+=f+"|"
-		print line.strip("|")
+		ret_list.append(line.strip("|"))
+	
+	return ret_list
 
-def main(argv):
+def parse_ixp_wrapper():
 	cites=parse_ref()
-	parse_ixp(cites)
-
-if __name__ == "__main__":
-	main(sys.argv)
+	return parse_ixp(cites)
